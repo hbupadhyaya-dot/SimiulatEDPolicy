@@ -830,33 +830,24 @@ function App() {
     })
   }
 
-  // Reset function to restore default values based on research averages
+  // Reset function to restore all policy levers to center position (50%)
   const handleReset = () => {
     setPolicyIntensities({
-      // District Administrator - based on research averages
-      INNOV_INCENT: 7, // $3.5M (average of $2-5M range)
-      PROTECT_STD: 72, // 70-75 average
-      PD_FUNDS: 31, // 25-30 hours average
-      
-      // Educational Institution Leader
-      EDUC_AUTONOMY: 50, // 45-55% average
-      AI_CAREER_PATH: 15, // 1-2 hours/week average
-      DIGITAL_CITIZEN: 35, // 15-20% average
-      
-      // Community Representative
-      COMM_INPUT: 50, // 10-12 meetings/year average
-      IMPACT_REP_STD: 70, // 65-75 average
-      LOCAL_JOB_ALIGN: 45, // 90-120 hours/year average
-      
-      // EdTech Industry
-      INTEROP_STD: 47, // 40-55 average
-      INFRA_INVEST: 20, // 15-25% average
-      ACCESS_STD: 77, // 75-80% average
-      
-      // Research & Ethics Advisor
-      STATE_FED_PART: 10, // $10M (average of $5-15M range)
-      INNOV_SANDBOX: 45, // 40-50 average
-      MODEL_EVAL_STD: 65 // 60-70 average
+      DATA_ANALYTICS: 50,
+      PROTECT_STD: 50,
+      PD_FUNDS: 50,
+      EDUC_AUTONOMY: 50,
+      AI_INTEGRATION: 50,
+      DIGITAL_CITIZEN: 50,
+      COMM_INPUT: 50,
+      IMPACT_REP_STD: 50,
+      LOCAL_JOB_ALIGN: 50,
+      INTEROP_STD: 50,
+      INFRA_INVEST: 50,
+      ACCESS_STD: 50,
+      STATE_FED_PART: 50,
+      INNOV_SANDBOX: 50,
+      MODEL_EVAL_STD: 50
     })
     setSelectedPolicies([])
     setSelectedTimeSeriesMetrics(['AI_LITERACY'])
