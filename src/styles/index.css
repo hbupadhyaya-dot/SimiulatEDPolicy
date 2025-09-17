@@ -661,6 +661,67 @@
   @apply scale-105 shadow-md;
 }
 
+/* 🎯 Policy Lever Slider Enhancements */
+.policy-slider {
+  @apply transition-all duration-300 relative;
+}
+
+.policy-slider:hover {
+  @apply shadow-lg transform scale-102;
+}
+
+.policy-slider::-webkit-slider-thumb {
+  @apply transition-all duration-200;
+}
+
+.policy-slider:hover::-webkit-slider-thumb {
+  @apply scale-125 shadow-lg;
+}
+
+.policy-slider::-moz-range-thumb {
+  @apply transition-all duration-200;
+}
+
+.policy-slider:hover::-moz-range-thumb {
+  @apply scale-125 shadow-lg;
+}
+
+/* 📊 Stakeholder Section Cards */
+.stakeholder-card {
+  @apply transition-all duration-300;
+}
+
+.stakeholder-card:hover {
+  @apply transform -translate-y-2 shadow-xl border-opacity-100;
+}
+
+/* 📈 Outcome Metric Cards */
+.outcome-metric-card {
+  @apply transition-all duration-300 cursor-pointer;
+}
+
+.outcome-metric-card:hover {
+  @apply transform -translate-y-1 shadow-lg scale-105;
+}
+
+/* 🎨 Policy Card Container */
+.policy-container {
+  @apply transition-all duration-300;
+}
+
+.policy-container:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+/* 🎪 Chart Section Enhancements */
+.chart-section {
+  @apply transition-all duration-300;
+}
+
+.chart-section:hover {
+  @apply transform -translate-y-1 shadow-xl;
+}
+
 /* 🎪 Modal Animations */
 .modal-overlay {
   animation: modalOverlayIn 0.3s ease-out;

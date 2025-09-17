@@ -1047,7 +1047,7 @@ function App() {
               <div className="grid grid-cols-12 gap-4 h-[48%]">
                 {/* Time Series Chart */}
                 <div className="col-span-6">
-                  <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-100 shadow-sm h-full">
+                  <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-100 shadow-sm h-full chart-section">
                     <div className="flex justify-between items-center mb-2">
                       <h3 className="text-sm font-medium text-slate-600 flex items-center">
                       <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mr-2"></div>
@@ -1120,7 +1120,7 @@ function App() {
 
                 {/* Spider Chart */}
                 <div className="col-span-6">
-                  <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-100 shadow-sm h-full">
+                  <div className="bg-white/95 backdrop-blur-sm p-3 rounded-lg border border-slate-100 shadow-sm h-full chart-section">
                     <h3 className="text-sm font-medium mb-2 text-slate-600 flex items-center">
                       <div className="w-1.5 h-1.5 bg-slate-400 rounded-full mr-2"></div>
                       Spider Chart
@@ -1146,7 +1146,7 @@ function App() {
                       const gradientId = `gradient-${metric}`;
                       
                       return (
-                        <div key={metric} className="text-center p-2 bg-slate-50/50 rounded border-0 relative flex-1 flex flex-col items-center">
+                        <div key={metric} className="text-center p-2 bg-slate-50/50 rounded border-0 relative flex-1 flex flex-col items-center outcome-metric-card">
                           <button
                             onClick={() => openMetricModal(metric)}
                             className="absolute top-1 right-1 w-4 h-4 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-800 transition-colors z-10"
@@ -1203,12 +1203,12 @@ function App() {
                 <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-slate-100 shadow-sm p-2">
                   <div className="grid grid-cols-5 gap-2">
                     {/* Column 1 - District Administrator */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-blue-100">District</h3>
                       {Object.values(policyDefinitions).filter(policy => 
                         ['DATA_ANALYTICS', 'PROTECT_STD', 'PD_FUNDS'].includes(policy.id)
                       ).map((policy) => (
-                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
+                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative policy-container">
                           <div className="mb-1 flex items-center justify-between">
                             <div className="text-xs font-semibold text-slate-800 text-center leading-tight flex-1">{policy.name}</div>
                             <button
@@ -1227,7 +1227,7 @@ function App() {
                                 max="100"
                                 value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
-                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-blue"
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-blue policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
@@ -1281,12 +1281,12 @@ function App() {
                     </div>
 
                     {/* Column 2 - Educational Institution Leader */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-green-100">Institution</h3>
                       {Object.values(policyDefinitions).filter(policy => 
                         ['EDUC_AUTONOMY', 'AI_INTEGRATION', 'DIGITAL_CITIZEN'].includes(policy.id)
                       ).map((policy) => (
-                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
+                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative policy-container">
                           <div className="mb-1 flex items-center justify-between">
                             <div className="text-xs font-semibold text-slate-800 text-center leading-tight flex-1">{policy.name}</div>
                             <button
@@ -1305,7 +1305,7 @@ function App() {
                                 max="100"
                                 value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
-                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-green"
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-green policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
@@ -1359,12 +1359,12 @@ function App() {
                     </div>
 
                     {/* Column 3 - Community Representative */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-purple-100">Community</h3>
                       {Object.values(policyDefinitions).filter(policy => 
                         ['COMM_INPUT', 'IMPACT_REP_STD', 'LOCAL_JOB_ALIGN'].includes(policy.id)
                       ).map((policy) => (
-                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
+                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative policy-container">
                           <div className="mb-1 flex items-center justify-between">
                             <div className="text-xs font-semibold text-slate-800 text-center leading-tight flex-1">{policy.name}</div>
                             <button
@@ -1383,7 +1383,7 @@ function App() {
                                 max="100"
                                 value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
-                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-purple"
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-purple policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
@@ -1437,12 +1437,12 @@ function App() {
                     </div>
 
                     {/* Column 4 - EdTech Industry Representative */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-orange-100">Industry</h3>
                       {Object.values(policyDefinitions).filter(policy => 
                         ['INTEROP_STD', 'INFRA_INVEST', 'ACCESS_STD'].includes(policy.id)
                       ).map((policy) => (
-                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
+                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative policy-container">
                           <div className="mb-1 flex items-center justify-between">
                             <div className="text-xs font-semibold text-slate-800 text-center leading-tight flex-1">{policy.name}</div>
                             <button
@@ -1461,7 +1461,7 @@ function App() {
                                 max="100"
                                 value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
-                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-orange"
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-orange policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
@@ -1515,12 +1515,12 @@ function App() {
                     </div>
 
                     {/* Column 5 - Research & Ethics Advisor */}
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-red-100">Research</h3>
                       {Object.values(policyDefinitions).filter(policy => 
                         ['STATE_FED_PART', 'INNOV_SANDBOX', 'MODEL_EVAL_STD'].includes(policy.id)
                       ).map((policy) => (
-                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
+                        <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative policy-container">
                           <div className="mb-1 flex items-center justify-between">
                             <div className="text-xs font-semibold text-slate-800 text-center leading-tight flex-1">{policy.name}</div>
                             <button
@@ -1539,7 +1539,7 @@ function App() {
                                 max="100"
                                 value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
-                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-red"
+                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-red policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
