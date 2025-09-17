@@ -554,7 +554,8 @@
 }
 
 .chart-container:hover {
-  @apply shadow-xl scale-105 border-slate-300;
+  @apply shadow-md border-slate-300;
+  transform: scale(1.01);
 }
 
 .chart-title {
@@ -566,7 +567,7 @@
 }
 
 .chart-title:hover .chart-title-icon {
-  @apply scale-110 rotate-3;
+  @apply scale-105 rotate-1;
 }
 
 /* ✨ Professional Animation Classes */
@@ -599,11 +600,11 @@
 
 /* 🎯 Professional Card Hover Effects */
 .card-hover {
-  @apply transition-all duration-300 cursor-pointer;
+  @apply transition-all duration-200 cursor-pointer;
 }
 
 .card-hover:hover {
-  @apply transform -translate-y-1 shadow-lg;
+  @apply transform -translate-y-0.5 shadow-md;
 }
 
 .card-hover-subtle {
@@ -611,7 +612,7 @@
 }
 
 .card-hover-subtle:hover {
-  @apply transform -translate-y-0.5 shadow-md border-opacity-80;
+  @apply transform -translate-y-0.5 shadow-sm border-opacity-90;
 }
 
 /* 🎨 Professional Button Enhancements */
@@ -620,7 +621,7 @@
 }
 
 .btn-professional:hover {
-  @apply transform -translate-y-0.5 shadow-lg;
+  @apply transform -translate-y-0.5 shadow-md;
 }
 
 .btn-professional::before {
@@ -663,11 +664,12 @@
 
 /* 🎯 Policy Lever Slider Enhancements */
 .policy-slider {
-  @apply transition-all duration-300 relative;
+  @apply transition-all duration-200 relative;
 }
 
 .policy-slider:hover {
-  @apply shadow-lg transform scale-105;
+  @apply shadow-md;
+  transform: scale(1.02);
 }
 
 .policy-slider::-webkit-slider-thumb {
@@ -675,7 +677,7 @@
 }
 
 .policy-slider:hover::-webkit-slider-thumb {
-  @apply scale-125 shadow-lg;
+  @apply scale-110 shadow-md;
 }
 
 .policy-slider::-moz-range-thumb {
@@ -683,43 +685,44 @@
 }
 
 .policy-slider:hover::-moz-range-thumb {
-  @apply scale-125 shadow-lg;
+  @apply scale-110 shadow-md;
 }
 
 /* 📊 Stakeholder Section Cards */
 .stakeholder-card {
-  @apply transition-all duration-300;
+  @apply transition-all duration-200;
 }
 
 .stakeholder-card:hover {
-  @apply transform -translate-y-2 shadow-xl border-opacity-100;
+  @apply transform -translate-y-0.5 shadow-md border-opacity-100;
 }
 
 /* 📈 Outcome Metric Cards */
 .outcome-metric-card {
-  @apply transition-all duration-300 cursor-pointer;
+  @apply transition-all duration-200 cursor-pointer;
 }
 
 .outcome-metric-card:hover {
-  @apply transform -translate-y-1 shadow-lg scale-105;
+  @apply transform -translate-y-0.5 shadow-md;
+  transform: translateY(-2px) scale(1.02);
 }
 
 /* 🎨 Policy Card Container */
 .policy-container {
-  @apply transition-all duration-300;
+  @apply transition-all duration-200;
 }
 
 .policy-container:hover {
-  @apply transform -translate-y-1 shadow-lg;
+  @apply transform -translate-y-0.5 shadow-sm;
 }
 
 /* 🎪 Chart Section Enhancements */
 .chart-section {
-  @apply transition-all duration-300;
+  @apply transition-all duration-200;
 }
 
 .chart-section:hover {
-  @apply transform -translate-y-1 shadow-xl;
+  @apply transform -translate-y-0.5 shadow-md;
 }
 
 /* 🎪 Modal Animations */
