@@ -145,7 +145,7 @@ const ImpactExplanationModal = ({ isOpen, onClose, selectedPolicies, policyInten
     return stories[policyId] || null
   }
 
-  const getPerspectiveAnalysis = (policyId, intensity) => {
+  const getPerspectiveAnalysis = (policyId) => {
     const analyses = {
       'PD_FUNDS': {
         students: `More engaging classes with AI-powered projects and personalized learning experiences`,
@@ -156,13 +156,13 @@ const ImpactExplanationModal = ({ isOpen, onClose, selectedPolicies, policyInten
       'INFRA_INVEST': {
         students: `Fast, reliable access to AI tools means no more frustrating delays or tech inequity`,
         teachers: `Technology actually works when needed - lesson plans aren't derailed by poor connectivity`,
-        parents: `Confidence that their child won't be left behind due to inadequate school technology`,
+        parents: `Confidence that their child won&apos;t be left behind due to inadequate school technology`,
         administrators: `Foundation for innovation - other initiatives can build on solid infrastructure`
       },
       'PROTECT_STD': {
         students: `Peace of mind knowing personal data is safe while exploring AI learning tools`,
         teachers: `Clear guidelines remove guesswork about what AI tools are safe to use with students`,
-        parents: `Trust that schools take privacy seriously and won't expose children to harmful AI`,
+        parents: `Trust that schools take privacy seriously and won&apos;t expose children to harmful AI`,
         administrators: `Legal protection and community confidence enable bold AI education initiatives`
       }
     }
@@ -262,7 +262,7 @@ const ImpactExplanationModal = ({ isOpen, onClose, selectedPolicies, policyInten
               {/* Multi-Perspective Analysis */}
               <div>
                 <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
-                  <span className="mr-2">👁️</span>Who's Affected & How
+                  <span className="mr-2">👁️</span>Who&apos;s Affected & How
                 </h3>
                 <div className="space-y-4">
                   {activePolicies.filter(p => p.perspectives).map((policy) => (
@@ -333,9 +333,6 @@ const ImpactExplanationModal = ({ isOpen, onClose, selectedPolicies, policyInten
 const PolicyModal = ({ isOpen, onClose, policyName, description, importance, resources }) => {
   if (!isOpen) return null
 
-  const handleLinkClick = (url) => {
-    window.open(url, '_blank')
-  }
 
   const formatResources = (resourcesText) => {
     const lines = resourcesText.split('\n')
@@ -396,7 +393,7 @@ const PolicyModal = ({ isOpen, onClose, policyName, description, importance, res
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">Why it's important:</h3>
+              <h3 className="text-lg font-semibold text-slate-700 mb-2">Why it&apos;s important:</h3>
               <p className="text-sm text-slate-600 leading-relaxed">{importance}</p>
             </div>
             
@@ -605,7 +602,7 @@ const StartScreenModal = ({ isOpen, onClose }) => {
               </h2>
               <div className="bg-slate-50 rounded-xl p-6">
                 <p className="text-slate-700 mb-4">
-                  The simulator allows you to experiment with different AI education policy combinations by adjusting 15 policy levers across 5 stakeholder groups. As you move the sliders, you'll see real-time updates to 8 outcome metrics displayed as circular indicators at the bottom of the screen.
+                  The simulator allows you to experiment with different AI education policy combinations by adjusting 15 policy levers across 5 stakeholder groups. As you move the sliders, you&apos;ll see real-time updates to 8 outcome metrics displayed as circular indicators at the bottom of the screen.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
@@ -621,7 +618,7 @@ const StartScreenModal = ({ isOpen, onClose }) => {
                   <div>
                     <h3 className="font-semibold text-slate-800 mb-3">Exploring Policy Impacts</h3>
                     <ul className="text-sm text-slate-600 space-y-2">
-                      <li>• Use the "Why these impacts" button to see detailed stories about how your policy choices create real change</li>
+                      <li>• Use the &quot;Why these impacts&quot; button to see detailed stories about how your policy choices create real change</li>
                       <li>• Click the information buttons (i) on policies and metrics to access detailed explanations and research resources</li>
                       <li>• Experiment with different policy combinations using the Reset button to start fresh</li>
                     </ul>
@@ -712,7 +709,8 @@ function App() {
   })
   const [impactExplanationModal, setImpactExplanationModal] = useState(false)
   const [showStartScreen, setShowStartScreen] = useState(false)
-  const defaultMetrics = {
+  
+  const defaultMetrics = useMemo(() => ({
     AI_LITERACY: 50,
     COMMUNITY_TRUST: 50,
     INNOVATION_INDEX: 50,
@@ -721,7 +719,7 @@ function App() {
     BUDGET_STRAIN: 50,
     EMPLOYMENT_IMPACT: 50,
     AI_VULNERABILITY_INDEX: 50
-  };
+  }), []);
 
   const [currentMetrics, setCurrentMetrics] = useState(defaultMetrics)
 
@@ -750,7 +748,7 @@ function App() {
       console.error('Error calculating metrics:', error);
       setCurrentMetrics(defaultMetrics);
     }
-  }, [selectedPolicies, policyIntensities]);
+  }, [selectedPolicies, policyIntensities, defaultMetrics]);
 
   // Handle policy intensity changes
   const handlePolicyIntensityChange = (policyId, newValue) => {
@@ -787,21 +785,6 @@ function App() {
     return outcomeMetrics[metric]?.name || metric.replace(/_/g, ' ')
   }
 
-  // Policy toggle handler with default intensity setting
-  const handlePolicyToggle = (policyId) => {
-    if (selectedPolicies.includes(policyId)) {
-      setSelectedPolicies(selectedPolicies.filter(id => id !== policyId))
-    } else {
-      setSelectedPolicies([...selectedPolicies, policyId])
-      // Set default intensity if not already set
-      if (!policyIntensities[policyId]) {
-        setPolicyIntensities(prev => ({
-          ...prev,
-          [policyId]: 50
-        }))
-      }
-    }
-  }
 
   // Modal handler functions
   const openPolicyModal = (policyId) => {
