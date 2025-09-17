@@ -53,82 +53,240 @@ export const policyDefinitions = {
     name: 'Interoperability Standards',
     description: 'Making all your school\'s digital tools play nice together like a well-coordinated team. You know how annoying it is when apps don\'t sync or when you have to re-enter your info everywhere? This policy fixes that problem for school tech. Your gradebook, learning apps, and AI tutors will work together like a perfectly coordinated team, sharing information seamlessly while keeping everything secure.',
     stakeholder: 'Research & Ethics Advisor'
+  },
+  INNOV_INCENT: {
+    id: 'INNOV_INCENT',
+    name: 'Innovation Incentives',
+    description: 'Rewarding schools and teachers who pioneer creative AI solutions. Think of this as a "bonus points" system for educational innovation! Schools that develop new ways to use AI effectively get extra funding and recognition. It\'s like getting achievements in a game, but for real-world educational breakthroughs.',
+    stakeholder: 'District Administrator'
+  },
+  AI_CAREER_PATH: {
+    id: 'AI_CAREER_PATH',
+    name: 'AI Career Pathways',
+    description: 'Creating clear routes from high school to AI careers. Instead of wondering "what can I do with AI skills?", this policy maps out specific career tracks and the education needed to get there. It\'s like having a GPS for your future career, showing you exactly which classes, internships, and experiences will lead to exciting AI jobs.',
+    stakeholder: 'Educational Institution Leader'
+  },
+  COMM_INPUT: {
+    id: 'COMM_INPUT',
+    name: 'Community Input',
+    description: 'Making sure parents, students, and community members have a real voice in AI education decisions. This policy creates regular town halls, surveys, and feedback sessions so everyone affected by AI in schools gets to share their thoughts. It\'s democracy in action - your voice matters in shaping how AI impacts your education!',
+    stakeholder: 'Community Representative'
+  },
+  IMPACT_REP_STD: {
+    id: 'IMPACT_REP_STD',
+    name: 'Impact Reporting Standards',
+    description: 'Creating transparent, easy-to-understand reports about how AI is actually helping students learn. No more confusing jargon or hidden results! This policy ensures schools regularly share clear data about AI\'s impact on learning outcomes, so everyone can see what\'s working and what needs improvement.',
+    stakeholder: 'Community Representative'
+  },
+  LOCAL_JOB_ALIGN: {
+    id: 'LOCAL_JOB_ALIGN',
+    name: 'Local Job Alignment',
+    description: 'Connecting AI education to real job opportunities in your community. This policy ensures that the AI skills you learn in school actually match what local employers need. It\'s like having a direct pipeline from your classroom to your future career, with local businesses actively involved in shaping the curriculum.',
+    stakeholder: 'Community Representative'
+  },
+  STATE_FED_PART: {
+    id: 'STATE_FED_PART',
+    name: 'External Funding',
+    description: 'Coordinating AI education policies between state and federal levels to avoid confusion and maximize resources. This policy ensures that federal AI education initiatives work smoothly with state requirements, creating a unified approach to AI in schools. It\'s like having all the different levels of government work together as one team.',
+    stakeholder: 'Research & Ethics Advisor'
+  },
+  DATA_ANALYTICS: {
+    id: 'DATA_ANALYTICS',
+    name: 'Data Analytics Capacity',
+    description: 'Building the data infrastructure and analytical capabilities needed to measure and improve AI education outcomes. This policy ensures schools can track student progress, identify effective AI tools, and make data-driven decisions about educational technology. It\'s like giving schools a powerful dashboard to see what\'s working and what needs improvement.',
+    stakeholder: 'District Administrator'
+  },
+  AI_INTEGRATION: {
+    id: 'AI_INTEGRATION',
+    name: 'AI Integration Standards',
+    description: 'Creating clear guidelines for how AI tools should be integrated into existing educational workflows. This policy ensures AI enhances rather than disrupts learning, with proper training for teachers and students on how to use AI effectively. It\'s like having a playbook for successfully incorporating AI into your daily learning routine.',
+    stakeholder: 'Educational Institution Leader'
   }
 };
 
 // Outcome metrics - Simplified for High Schoolers
 export const outcomeMetrics = {
   AI_LITERACY: { name: 'AI Literacy', baseline: 50 },
-  TEACHER_SATISFACTION: { name: 'Teacher Morale', baseline: 50 },
-  DIGITAL_EQUITY: { name: 'Digital Fairness', baseline: 50 },
-  AI_VULNERABILITY_INDEX: { name: 'AI Vulnerability', baseline: 50 },
-  BUDGET_STRAIN: { name: 'Budget Strain', baseline: 50 }
+  COMMUNITY_TRUST: { name: 'Community Trust', baseline: 50 },
+  INNOVATION_INDEX: { name: 'Innovation Index', baseline: 50 },
+  TEACHER_SATISFACTION: { name: 'Teacher Satisfaction', baseline: 50 },
+  DIGITAL_EQUITY: { name: 'Digital Equity', baseline: 50 },
+  BUDGET_STRAIN: { name: 'Budget Strain', baseline: 50 },
+  EMPLOYMENT_IMPACT: { name: 'Employment Impact', baseline: 50 },
+  AI_VULNERABILITY_INDEX: { name: 'AI Vulnerability Index', baseline: 50 }
 };
 
 // Impact coefficients for each policy on each outcome metric (simplified)
 const coefficients = {
   PROTECT_STD: {
     AI_LITERACY: 0.2,
+    COMMUNITY_TRUST: 0.3,
+    INNOVATION_INDEX: 0.1,
     TEACHER_SATISFACTION: 0.1,
     DIGITAL_EQUITY: 0.3,
-    AI_VULNERABILITY_INDEX: -0.5,
-    BUDGET_STRAIN: 0.2
+    BUDGET_STRAIN: 0.2,
+    EMPLOYMENT_IMPACT: 0.1,
+    AI_VULNERABILITY_INDEX: -0.5
   },
   PD_FUNDS: {
     AI_LITERACY: 0.5,
+    COMMUNITY_TRUST: 0.2,
+    INNOVATION_INDEX: 0.3,
     TEACHER_SATISFACTION: 0.5,
     DIGITAL_EQUITY: 0.4,
-    AI_VULNERABILITY_INDEX: -0.3,
-    BUDGET_STRAIN: 0.4
+    BUDGET_STRAIN: 0.4,
+    EMPLOYMENT_IMPACT: 0.2,
+    AI_VULNERABILITY_INDEX: -0.3
   },
   INFRA_INVEST: {
     AI_LITERACY: 0.3,
+    COMMUNITY_TRUST: 0.1,
+    INNOVATION_INDEX: 0.4,
     TEACHER_SATISFACTION: 0.2,
     DIGITAL_EQUITY: 0.5,
-    AI_VULNERABILITY_INDEX: -0.2,
-    BUDGET_STRAIN: 0.5
+    BUDGET_STRAIN: 0.5,
+    EMPLOYMENT_IMPACT: 0.3,
+    AI_VULNERABILITY_INDEX: -0.2
   },
   EDUC_AUTONOMY: {
     AI_LITERACY: 0.2,
+    COMMUNITY_TRUST: 0.3,
+    INNOVATION_INDEX: 0.4,
     TEACHER_SATISFACTION: 0.5,
     DIGITAL_EQUITY: 0.2,
-    AI_VULNERABILITY_INDEX: 0.15,
-    BUDGET_STRAIN: 0.1
+    BUDGET_STRAIN: 0.1,
+    EMPLOYMENT_IMPACT: 0.1,
+    AI_VULNERABILITY_INDEX: 0.15
   },
   DIGITAL_CITIZEN: {
     AI_LITERACY: 0.5,
+    COMMUNITY_TRUST: 0.4,
+    INNOVATION_INDEX: 0.2,
     TEACHER_SATISFACTION: 0.1,
     DIGITAL_EQUITY: 0.5,
-    AI_VULNERABILITY_INDEX: -0.3,
-    BUDGET_STRAIN: 0.1
+    BUDGET_STRAIN: 0.1,
+    EMPLOYMENT_IMPACT: 0.3,
+    AI_VULNERABILITY_INDEX: -0.3
   },
   ACCESS_STD: {
     AI_LITERACY: 0.2,
+    COMMUNITY_TRUST: 0.2,
+    INNOVATION_INDEX: 0.1,
     TEACHER_SATISFACTION: 0.1,
     DIGITAL_EQUITY: 0.5,
-    AI_VULNERABILITY_INDEX: 0.0,
-    BUDGET_STRAIN: 0.2
+    BUDGET_STRAIN: 0.2,
+    EMPLOYMENT_IMPACT: 0.1,
+    AI_VULNERABILITY_INDEX: 0.0
   },
   INNOV_SANDBOX: {
     AI_LITERACY: 0.3,
+    COMMUNITY_TRUST: 0.1,
+    INNOVATION_INDEX: 0.6,
     TEACHER_SATISFACTION: 0.3,
     DIGITAL_EQUITY: 0.3,
-    AI_VULNERABILITY_INDEX: -0.4,
-    BUDGET_STRAIN: 0.3
+    BUDGET_STRAIN: 0.3,
+    EMPLOYMENT_IMPACT: 0.4,
+    AI_VULNERABILITY_INDEX: -0.4
   },
   MODEL_EVAL_STD: {
     AI_LITERACY: 0.1,
+    COMMUNITY_TRUST: 0.4,
+    INNOVATION_INDEX: 0.2,
     TEACHER_SATISFACTION: 0.1,
     DIGITAL_EQUITY: 0.3,
-    AI_VULNERABILITY_INDEX: -0.5,
-    BUDGET_STRAIN: 0.2
+    BUDGET_STRAIN: 0.2,
+    EMPLOYMENT_IMPACT: 0.1,
+    AI_VULNERABILITY_INDEX: -0.5
   },
   INTEROP_STD: {
     AI_LITERACY: 0.1,
+    COMMUNITY_TRUST: 0.2,
+    INNOVATION_INDEX: 0.3,
     TEACHER_SATISFACTION: 0.4,
     DIGITAL_EQUITY: 0.3,
-    AI_VULNERABILITY_INDEX: -0.5,
-    BUDGET_STRAIN: 0.1
+    BUDGET_STRAIN: 0.1,
+    EMPLOYMENT_IMPACT: 0.2,
+    AI_VULNERABILITY_INDEX: -0.5
+  },
+  INNOV_INCENT: {
+    AI_LITERACY: 0.4,
+    COMMUNITY_TRUST: 0.2,
+    INNOVATION_INDEX: 0.5,
+    TEACHER_SATISFACTION: 0.3,
+    DIGITAL_EQUITY: 0.2,
+    BUDGET_STRAIN: 0.3,
+    EMPLOYMENT_IMPACT: 0.3,
+    AI_VULNERABILITY_INDEX: 0.1
+  },
+  AI_CAREER_PATH: {
+    AI_LITERACY: 0.5,
+    COMMUNITY_TRUST: 0.3,
+    INNOVATION_INDEX: 0.4,
+    TEACHER_SATISFACTION: 0.2,
+    DIGITAL_EQUITY: 0.3,
+    BUDGET_STRAIN: 0.1,
+    EMPLOYMENT_IMPACT: 0.6,
+    AI_VULNERABILITY_INDEX: -0.1
+  },
+  COMM_INPUT: {
+    AI_LITERACY: 0.1,
+    COMMUNITY_TRUST: 0.5,
+    INNOVATION_INDEX: 0.2,
+    TEACHER_SATISFACTION: 0.2,
+    DIGITAL_EQUITY: 0.4,
+    BUDGET_STRAIN: 0.1,
+    EMPLOYMENT_IMPACT: 0.1,
+    AI_VULNERABILITY_INDEX: -0.2
+  },
+  IMPACT_REP_STD: {
+    AI_LITERACY: 0.2,
+    COMMUNITY_TRUST: 0.4,
+    INNOVATION_INDEX: 0.1,
+    TEACHER_SATISFACTION: 0.3,
+    DIGITAL_EQUITY: 0.3,
+    BUDGET_STRAIN: 0.1,
+    EMPLOYMENT_IMPACT: 0.1,
+    AI_VULNERABILITY_INDEX: -0.3
+  },
+  LOCAL_JOB_ALIGN: {
+    AI_LITERACY: 0.3,
+    COMMUNITY_TRUST: 0.3,
+    INNOVATION_INDEX: 0.2,
+    TEACHER_SATISFACTION: 0.2,
+    DIGITAL_EQUITY: 0.2,
+    BUDGET_STRAIN: 0.0,
+    EMPLOYMENT_IMPACT: 0.5,
+    AI_VULNERABILITY_INDEX: 0.0
+  },
+  STATE_FED_PART: {
+    AI_LITERACY: 0.3,
+    COMMUNITY_TRUST: 0.4,
+    INNOVATION_INDEX: 0.3,
+    TEACHER_SATISFACTION: 0.3,
+    DIGITAL_EQUITY: 0.4,
+    BUDGET_STRAIN: 0.2,
+    EMPLOYMENT_IMPACT: 0.2,
+    AI_VULNERABILITY_INDEX: -0.2
+  },
+  DATA_ANALYTICS: {
+    AI_LITERACY: 0.4,
+    COMMUNITY_TRUST: 0.2,
+    INNOVATION_INDEX: 0.5,
+    TEACHER_SATISFACTION: 0.3,
+    DIGITAL_EQUITY: 0.3,
+    BUDGET_STRAIN: 0.2,
+    EMPLOYMENT_IMPACT: 0.4,
+    AI_VULNERABILITY_INDEX: -0.1
+  },
+  AI_INTEGRATION: {
+    AI_LITERACY: 0.6,
+    COMMUNITY_TRUST: 0.3,
+    INNOVATION_INDEX: 0.4,
+    TEACHER_SATISFACTION: 0.4,
+    DIGITAL_EQUITY: 0.4,
+    BUDGET_STRAIN: 0.3,
+    EMPLOYMENT_IMPACT: 0.5,
+    AI_VULNERABILITY_INDEX: -0.2
   }
 };
 
@@ -136,25 +294,34 @@ const coefficients = {
 export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
   const metrics = {
     AI_LITERACY: 50,
+    COMMUNITY_TRUST: 50,
+    INNOVATION_INDEX: 50,
     TEACHER_SATISFACTION: 50,
     DIGITAL_EQUITY: 50,
-    AI_VULNERABILITY_INDEX: 50,
-    BUDGET_STRAIN: 50
+    BUDGET_STRAIN: 50,
+    EMPLOYMENT_IMPACT: 50,
+    AI_VULNERABILITY_INDEX: 50
   };
 
   // Calculate direct impacts with enhanced responsiveness
   selectedPolicies.forEach(policyId => {
     // Use standardized baseline for all policies (50%)
     const baselineIntensities = {
+      DATA_ANALYTICS: 50,
       PROTECT_STD: 50,
       PD_FUNDS: 50,
-      INFRA_INVEST: 50,
       EDUC_AUTONOMY: 50,
+      AI_INTEGRATION: 50,
       DIGITAL_CITIZEN: 50,
+      COMM_INPUT: 50,
+      IMPACT_REP_STD: 50,
+      LOCAL_JOB_ALIGN: 50,
+      INTEROP_STD: 50,
+      INFRA_INVEST: 50,
       ACCESS_STD: 50,
+      STATE_FED_PART: 50,
       INNOV_SANDBOX: 50,
-      MODEL_EVAL_STD: 50,
-      INTEROP_STD: 50
+      MODEL_EVAL_STD: 50
     };
     
     const center = baselineIntensities[policyId] || 50;

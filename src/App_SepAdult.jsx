@@ -675,7 +675,23 @@ const StartScreenModal = ({ isOpen, onClose }) => {
 
 function App() {
   const [selectedPolicies, setSelectedPolicies] = useState([])
-  const [policyIntensities, setPolicyIntensities] = useState({})
+  const [policyIntensities, setPolicyIntensities] = useState({
+    DATA_ANALYTICS: 50,
+    PROTECT_STD: 50,
+    PD_FUNDS: 50,
+    EDUC_AUTONOMY: 50,
+    AI_INTEGRATION: 50,
+    DIGITAL_CITIZEN: 50,
+    COMM_INPUT: 50,
+    IMPACT_REP_STD: 50,
+    LOCAL_JOB_ALIGN: 50,
+    INTEROP_STD: 50,
+    INFRA_INVEST: 50,
+    ACCESS_STD: 50,
+    STATE_FED_PART: 50,
+    INNOV_SANDBOX: 50,
+    MODEL_EVAL_STD: 50
+  })
   const [selectedTimeSeriesMetrics, setSelectedTimeSeriesMetrics] = useState(['AI_LITERACY'])
   const [activeTab, setActiveTab] = useState('main')
 
@@ -890,7 +906,9 @@ function App() {
       'COMM_INPUT': 'Formal mechanisms to involve parents, students, teachers and other stakeholders in AI policy. This can include surveys, advisory boards or public forums soliciting feedback before adopting new AI tools or policies. For example, guidance from Wyoming\'s education department explicitly asks: "Is there a plan for community input on AI policy and implementation, including feedback from students, parents, teachers, and other stakeholders?". At a higher level, one study\'s policy framework urges that "students should play an active role in drafting and implementing [AI] policy". Community input informs student protection standards by incorporating parent privacy and safety concerns into policy development, while ensuring digital citizenship education reflects local cultural values about responsible AI use. This input provides workforce insights from local employers that guide AI education planning for regional opportunities, and identifies AI competencies that parents and employers expect teachers to develop, determining professional development funding priorities.',
       'EDUC_AUTONOMY': 'Policies that respect and preserve teachers\' professional judgment in using AI. This means giving teachers flexibility to decide if, when and how to use AI tools in their classrooms or assignments. For example, Lake Highland Prep\'s AI policy explicitly "grant[ed] teacher\'s autonomy to determine if and how the technology fits into the needs of their students and curriculum". Under such autonomy, administrators set guidelines (like the school\'s "Red/Yellow/Green" system), but individual teachers choose usage levels per assignment. Teacher autonomy enables educators to identify relevant AI training that matches their professional development needs while providing feedback on training effectiveness. This autonomy allows meaningful participation in innovation sandboxes by adapting experimental tools to pedagogical approaches, and enables customization of AI instruction based on students\' career interests and local employment opportunities.',
       'AI_CAREER_PATH': 'Initiatives that create clear educational-to-career routes in AI and related fields. Examples include specialized high school programs (like AI magnet schools), partnerships with industry for internships, and guidance counseling that highlights AI-related careers. These programs might integrate AI into career-technical education or offer certifications (e.g. AI foundations certificates). The goal is to ensure students, especially from underrepresented groups, can smoothly transition into AI jobs or further STEM education. Career pathways require professional development funding to train teachers in AI industry standards, while connecting to local job market alignment through regional employment opportunities and employer partnerships. These pathways benefit from innovation sandboxes that pilot new workforce development approaches and require infrastructure investment in industry-standard AI tools that provide authentic workplace preparation environments.',
-      'DIGITAL_CITIZEN': 'Implementation of a comprehensive curriculum addressing responsible AI use, including ethical decision-making, privacy awareness, critical evaluation of AI-generated content, understanding of AI bias, and skills for safe, effective participation in an AI-augmented digital world. UNESCO\'s AI Competency Framework for Students (2024) defines four core competencies: human-centered mindset, AI ethics, AI techniques, and AI system design. The OECD AI Literacy Framework (2025) emphasizes responsible AI engagement through four domains: Engaging with AI, Creating with AI, Learning about AI, and AI in Society. Digital citizenship education requires professional development funding to train teachers in responsible AI instruction and digital ethics pedagogy. This education incorporates community input by reflecting local cultural values and parent expectations about responsible technology use, while providing the ethical foundation for students to participate safely in innovation sandboxes through informed consent and responsible use principles.'
+      'DIGITAL_CITIZEN': 'Implementation of a comprehensive curriculum addressing responsible AI use, including ethical decision-making, privacy awareness, critical evaluation of AI-generated content, understanding of AI bias, and skills for safe, effective participation in an AI-augmented digital world. UNESCO\'s AI Competency Framework for Students (2024) defines four core competencies: human-centered mindset, AI ethics, AI techniques, and AI system design. The OECD AI Literacy Framework (2025) emphasizes responsible AI engagement through four domains: Engaging with AI, Creating with AI, Learning about AI, and AI in Society. Digital citizenship education requires professional development funding to train teachers in responsible AI instruction and digital ethics pedagogy. This education incorporates community input by reflecting local cultural values and parent expectations about responsible technology use, while providing the ethical foundation for students to participate safely in innovation sandboxes through informed consent and responsible use principles.',
+      'DATA_ANALYTICS': 'Building the data infrastructure and analytical capabilities needed to measure and improve AI education outcomes. This policy ensures schools can track student progress, identify effective AI tools, and make data-driven decisions about educational technology. It includes implementing data collection systems, analytics dashboards, and evaluation frameworks that help educators understand how AI tools are impacting learning. Data analytics capacity enables evidence-based decision making, supports innovation sandboxes by providing metrics to evaluate experimental programs, and enhances impact reporting through comprehensive data collection and analysis.',
+      'AI_INTEGRATION': 'Creating clear guidelines for how AI tools should be integrated into existing educational workflows. This policy ensures AI enhances rather than disrupts learning, with proper training for teachers and students on how to use AI effectively. It includes developing integration protocols, workflow optimization strategies, and best practices for seamless AI adoption in classrooms. AI integration standards work synergistically with professional development funding to train educators, support digital citizenship education through responsible AI use, and enable effective career pathway programs by providing hands-on experience with industry-standard AI tools.'
     }
     return descriptions[policyId] || 'Description not available.'
   }
@@ -912,7 +930,9 @@ function App() {
       'COMM_INPUT': 'Community input ensures that AI initiatives reflect local values and needs, not just top-down decisions. Involving stakeholders can reveal concerns (e.g. privacy fears from parents, ethical considerations from teachers) that might otherwise be overlooked. It also builds legitimacy: when families and educators feel heard, they are more likely to support AI integration. Importantly, students\' perspectives can highlight usability issues – after all, they are the users. This democratic approach aligns with equity goals (e.g. giving voice to underrepresented groups) and can help identify unintended consequences early.',
       'EDUC_AUTONOMY': 'Teachers best understand their students\' needs and can adapt AI use accordingly. Autonomy encourages experimentation and innovation at the classroom level and can increase buy-in (teachers are more willing to use AI if not forced). It acknowledges teachers as professionals, which is crucial in a field historically characterized by top-down mandates. Autonomy can also lead to more creative and context-sensitive uses of AI that rigid policies might overlook. Additionally, it complements efforts to involve teachers in decision-making.',
       'AI_CAREER_PATH': 'As AI transforms the workforce, schools must prepare students with the skills employers need. Career pathways signal to students that AI literacy has real-world value and can motivate learning. They also address equity: by building accessible pathways (through community colleges, alternative credentials, etc.), all students can share in AI opportunities. Policy efforts are already underway – for instance, a consortium of U.S. colleges is developing national AI standards to "better align career and technical education with core academic disciplines relating to tech career pathways". This lever bridges K-12 learning with higher-ed and industry needs.',
-      'DIGITAL_CITIZEN': 'Digital citizenship prepares students to navigate AI\'s complexities throughout life. It develops critical thinking about AI claims, protects against manipulation and misinformation, promotes ethical technology use, and empowers students as informed digital participants rather than passive consumers.'
+      'DIGITAL_CITIZEN': 'Digital citizenship prepares students to navigate AI\'s complexities throughout life. It develops critical thinking about AI claims, protects against manipulation and misinformation, promotes ethical technology use, and empowers students as informed digital participants rather than passive consumers.',
+      'DATA_ANALYTICS': 'Data analytics capacity enables evidence-based decision making in AI education by providing comprehensive insights into tool effectiveness, student outcomes, and system performance. This capability is essential for optimizing AI implementations, identifying successful practices, and ensuring accountability. Analytics help educators understand which AI tools work best for different student populations, support continuous improvement through data-driven insights, and enable transparent reporting that builds community trust.',
+      'AI_INTEGRATION': 'AI integration standards ensure that artificial intelligence tools enhance rather than disrupt educational workflows. These guidelines help educators seamlessly incorporate AI into existing teaching practices while maintaining pedagogical integrity. Proper integration maximizes the benefits of AI tools, minimizes implementation challenges, and ensures that technology serves educational goals rather than driving them.'
     }
     return importance[policyId] || 'Information not available.'
   }
@@ -979,7 +999,9 @@ function App() {
       'COMM_INPUT': '• Bringing Communities In, Achieving AI for All: https://issues.org/artificial-intelligence-social-equity-parthasarathy-katzman/\n• How to Develop an Effective AI Policy for K–12 Schools: https://www.peardeck.com/blog/how-to-develop-an-effective-ai-policy-for-k-12-schools/\n• Wyoming DoE Guidance: https://edu.wyoming.gov/wp-content/uploads/2024/06/Guidance-for-AI-Policy-Development.pdf\n• Policy Framework: Students as Policy Drafters: https://educationaltechnologyjournal.springeropen.com/articles/10.1186/s41239-023-00408-3',
       'EDUC_AUTONOMY': '• Maintain Teacher Autonomy While Adopting AI Schoolwide: https://sais.org/resource/maintain-teacher-autonomy-while-adopting-ai-schoolwide/\n• Empowering ELA Teachers: Recommendations for Teacher Education in the AI Era: https://citejournal.org/volume-25/issue-1-25/english-language-arts/empowering-ela-teachers-recommendations-for-teacher-education-in-the-ai-era/\n• Autonomy in the Spaces: Teacher Autonomy, Scripted Lessons, and the Changing Role of Teachers: https://www.tandfonline.com/doi/full/10.1080/00220272.2023.2297229',
       'AI_CAREER_PATH': '• Riding the AI Wave: What\'s Happening in K-12 Education?: https://cset.georgetown.edu/article/riding-the-ai-wave-whats-happening-in-k-12-education/\n• Career Education Evolves to Meet Emerging Technology Demands: https://www.k12dive.com/news/career-education-evolves-emerging-technology-demands/743593/',
-      'DIGITAL_CITIZEN': '• What You Need to Know About UNESCO\'s New AI Competency Frameworks for Students and Teachers: https://www.unesco.org/en/articles/what-you-need-know-about-unescos-new-ai-competency-frameworks-students-and-teachers\n• Digital Citizenship in Education (ISTE): https://iste.org/digital-citizenship\n• OECD AI Literacy Framework: https://ailiteracyframework.org/'
+      'DIGITAL_CITIZEN': '• What You Need to Know About UNESCO\'s New AI Competency Frameworks for Students and Teachers: https://www.unesco.org/en/articles/what-you-need-know-about-unescos-new-ai-competency-frameworks-students-and-teachers\n• Digital Citizenship in Education (ISTE): https://iste.org/digital-citizenship\n• OECD AI Literacy Framework: https://ailiteracyframework.org/',
+      'DATA_ANALYTICS': '• Data Analytics in Education: A Comprehensive Guide: https://www.edweek.org/technology/data-analytics-in-education-a-comprehensive-guide/2024/03\n• Using Data to Improve Student Outcomes: https://www.oecd.org/en/publications/using-data-to-improve-student-outcomes_2024_c74f03de-en.html\n• Education Data Analytics: Best Practices and Implementation: https://www.cosn.org/education-data-analytics-best-practices/',
+      'AI_INTEGRATION': '• AI Integration in Education: A Practical Guide: https://www.iste.org/ai-integration-guide\n• Seamless AI Integration: Best Practices for Schools: https://www.edtechmagazine.com/k12/article/2024/08/seamless-ai-integration-best-practices-schools\n• AI Workflow Integration in Educational Settings: https://www.oecd.org/en/publications/ai-workflow-integration-educational-settings_2024_c74f03de-en.html'
     }
     return resources[policyId] || 'Resources not available.'
   }
@@ -1210,7 +1232,7 @@ function App() {
                     <div className="space-y-1.5">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-blue-100">District</h3>
                       {Object.values(policyDefinitions).filter(policy => 
-                        ['INNOV_INCENT', 'PROTECT_STD', 'PD_FUNDS'].includes(policy.id)
+                        ['DATA_ANALYTICS', 'PROTECT_STD', 'PD_FUNDS'].includes(policy.id)
                       ).map((policy) => (
                         <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
                           <div className="mb-1 flex items-center justify-between">
@@ -1229,19 +1251,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 
-                                       policy.id === 'INNOV_INCENT' ? 7 : 
-                                       policy.id === 'PROTECT_STD' ? 72 : 
-                                       policy.id === 'PD_FUNDS' ? 31 : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-blue"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = policy.id === 'INNOV_INCENT' ? 7 : 
-                                                   policy.id === 'PROTECT_STD' ? 72 : 
-                                                   policy.id === 'PD_FUNDS' ? 31 : 50;
+                                      const center = 50;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #2563eb ${center}%, #2563eb ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1257,53 +1274,30 @@ function App() {
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `${policy.id === 'INNOV_INCENT' ? 7 : 
-                                         policy.id === 'PROTECT_STD' ? 72 : 
-                                         policy.id === 'PD_FUNDS' ? 31 : 50}%`
+                                  left: `50%`
                                 }}
                               ></div>
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
-                                <span>{policy.id === 'INNOV_INCENT' ? '$0M' : policy.id === 'PD_FUNDS' ? '0' : '0'}</span>
-                                <span>{policy.id === 'INNOV_INCENT' ? '$50M' : policy.id === 'PD_FUNDS' ? '100' : '100'}</span>
+                                <span>0%</span>
+                                <span>100%</span>
                               </div>
                               <div className="flex justify-center mt-1">
                                 <div className="flex items-center space-x-1">
-                                  {policy.id === 'INNOV_INCENT' && (
-                                    <span className="text-xs text-slate-500">$</span>
-                                  )}
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={
-                                      policy.id === 'INNOV_INCENT' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 7)) * 0.5) :
-                                      policy.id === 'PROTECT_STD' ? (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 72) :
-                                      policy.id === 'PD_FUNDS' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 31)) * 1) :
-                                      (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50)
-                                    }
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                     onChange={(e) => {
-                                      const raw = Number(e.target.value);
-                                      let newIntensity = 50;
-                                      if (policy.id === 'INNOV_INCENT') {
-                                        newIntensity = raw * 2; // $M 0-50 -> intensity 0-100
-                                      } else if (policy.id === 'PROTECT_STD') {
-                                        newIntensity = raw; // 0-100
-                                      } else if (policy.id === 'PD_FUNDS') {
-                                        newIntensity = raw; // hours 0-100 -> intensity 0-100
-                                      } else {
-                                        newIntensity = raw;
-                                      }
-                                      newIntensity = Math.max(0, Math.min(100, Math.round(newIntensity)));
+                                      const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
                                     }}
-                                    min={policy.id === 'INNOV_INCENT' ? 0 : 0}
-                                    max={policy.id === 'INNOV_INCENT' ? 50 : 100}
+                                    min={0}
+                                    max={100}
                                     step={1}
                                   />
-                                  <span className="text-xs text-slate-500">
-                                    {policy.id === 'INNOV_INCENT' ? 'M' : policy.id === 'PD_FUNDS' ? 'hrs' : policy.id === 'PROTECT_STD' ? '%' : ''}
-                                  </span>
+                                  <span className="text-xs text-slate-500">%</span>
                                 </div>
                               </div>
                             </div>
@@ -1316,7 +1310,7 @@ function App() {
                     <div className="space-y-1.5">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-green-100">Institution</h3>
                       {Object.values(policyDefinitions).filter(policy => 
-                        ['EDUC_AUTONOMY', 'AI_CAREER_PATH', 'DIGITAL_CITIZEN'].includes(policy.id)
+                        ['EDUC_AUTONOMY', 'AI_INTEGRATION', 'DIGITAL_CITIZEN'].includes(policy.id)
                       ).map((policy) => (
                         <div key={policy.id} className="bg-white rounded-lg border border-slate-200 p-1.5 shadow-sm relative">
                           <div className="mb-1 flex items-center justify-between">
@@ -1335,19 +1329,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 
-                                       policy.id === 'EDUC_AUTONOMY' ? 50 : 
-                                       policy.id === 'AI_CAREER_PATH' ? 15 : 
-                                       policy.id === 'DIGITAL_CITIZEN' ? 35 : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-green"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = policy.id === 'EDUC_AUTONOMY' ? 50 : 
-                                                   policy.id === 'AI_CAREER_PATH' ? 15 : 
-                                                   policy.id === 'DIGITAL_CITIZEN' ? 35 : 50;
+                                      const center = 50;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #16a34a ${center}%, #16a34a ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1363,50 +1352,30 @@ function App() {
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `${policy.id === 'EDUC_AUTONOMY' ? 50 : 
-                                         policy.id === 'AI_CAREER_PATH' ? 15 : 
-                                         policy.id === 'DIGITAL_CITIZEN' ? 35 : 50}%`
+                                  left: `50%`
                                 }}
                               ></div>
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
-                                <span>{policy.id === 'EDUC_AUTONOMY' ? '0%' : policy.id === 'AI_CAREER_PATH' ? '0' : '0%'}</span>
-                                <span>{policy.id === 'EDUC_AUTONOMY' ? '100%' : policy.id === 'AI_CAREER_PATH' ? '10' : '50%'}</span>
+                                <span>0%</span>
+                                <span>100%</span>
                               </div>
                               <div className="flex justify-center mt-1">
                                 <div className="flex items-center space-x-1">
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={
-                                      policy.id === 'EDUC_AUTONOMY' ? (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50) :
-                                      policy.id === 'AI_CAREER_PATH' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 15)) * 0.1) :
-                                      policy.id === 'DIGITAL_CITIZEN' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 35)) * 0.5) :
-                                      (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50)
-                                    }
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                     onChange={(e) => {
-                                      const raw = Number(e.target.value);
-                                      let newIntensity = 50;
-                                      if (policy.id === 'EDUC_AUTONOMY') {
-                                        newIntensity = raw; // percent 0-100
-                                      } else if (policy.id === 'AI_CAREER_PATH') {
-                                        newIntensity = raw * 10; // hrs/wk 0-10 -> 0-100
-                                      } else if (policy.id === 'DIGITAL_CITIZEN') {
-                                        newIntensity = raw * 2; // % 0-50 -> 0-100
-                                      } else {
-                                        newIntensity = raw;
-                                      }
-                                      newIntensity = Math.max(0, Math.min(100, Math.round(newIntensity)));
+                                      const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
                                     }}
                                     min={0}
-                                    max={policy.id === 'AI_CAREER_PATH' ? 10 : policy.id === 'DIGITAL_CITIZEN' ? 50 : 100}
+                                    max={100}
                                     step={1}
                                   />
-                                  <span className="text-xs text-slate-500">
-                                    {policy.id === 'AI_CAREER_PATH' ? 'hrs/wk' : policy.id === 'EDUC_AUTONOMY' || policy.id === 'DIGITAL_CITIZEN' ? '%' : ''}
-                                  </span>
+                                  <span className="text-xs text-slate-500">%</span>
                                 </div>
                               </div>
                             </div>
@@ -1438,19 +1407,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 
-                                       policy.id === 'COMM_INPUT' ? 50 : 
-                                       policy.id === 'IMPACT_REP_STD' ? 70 : 
-                                       policy.id === 'LOCAL_JOB_ALIGN' ? 45 : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-purple"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = policy.id === 'COMM_INPUT' ? 50 : 
-                                                   policy.id === 'IMPACT_REP_STD' ? 70 : 
-                                                   policy.id === 'LOCAL_JOB_ALIGN' ? 45 : 50;
+                                      const center = 50;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #9333ea ${center}%, #9333ea ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1466,50 +1430,30 @@ function App() {
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `${policy.id === 'COMM_INPUT' ? 50 : 
-                                         policy.id === 'IMPACT_REP_STD' ? 70 : 
-                                         policy.id === 'LOCAL_JOB_ALIGN' ? 45 : 50}%`
+                                  left: `50%`
                                 }}
                               ></div>
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
-                                <span>{policy.id === 'COMM_INPUT' ? '0' : policy.id === 'LOCAL_JOB_ALIGN' ? '0' : '0'}</span>
-                                <span>{policy.id === 'COMM_INPUT' ? '24' : policy.id === 'LOCAL_JOB_ALIGN' ? '200' : '100'}</span>
+                                <span>0%</span>
+                                <span>100%</span>
                               </div>
                               <div className="flex justify-center mt-1">
                                 <div className="flex items-center space-x-1">
                                   <input
                                     type="number"
                                     className="w-20 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={
-                                      policy.id === 'COMM_INPUT' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50)) * 0.24) :
-                                      policy.id === 'IMPACT_REP_STD' ? (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 70) :
-                                      policy.id === 'LOCAL_JOB_ALIGN' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 45)) * 2) :
-                                      (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50)
-                                    }
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                     onChange={(e) => {
-                                      const raw = Number(e.target.value);
-                                      let newIntensity = 50;
-                                      if (policy.id === 'COMM_INPUT') {
-                                        newIntensity = raw / 0.24; // meetings/yr 0-24 -> 0-100
-                                      } else if (policy.id === 'IMPACT_REP_STD') {
-                                        newIntensity = raw; // 0-100
-                                      } else if (policy.id === 'LOCAL_JOB_ALIGN') {
-                                        newIntensity = raw / 2; // hrs/yr 0-200 -> 0-100
-                                      } else {
-                                        newIntensity = raw;
-                                      }
-                                      newIntensity = Math.max(0, Math.min(100, Math.round(newIntensity)));
+                                      const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
                                     }}
                                     min={0}
-                                    max={policy.id === 'COMM_INPUT' ? 24 : policy.id === 'LOCAL_JOB_ALIGN' ? 200 : 100}
+                                    max={100}
                                     step={1}
                                   />
-                                  <span className="text-xs text-slate-500">
-                                    {policy.id === 'COMM_INPUT' ? 'meetings/yr' : policy.id === 'LOCAL_JOB_ALIGN' ? 'hrs/yr' : ''}
-                                  </span>
+                                  <span className="text-xs text-slate-500">%</span>
                                 </div>
                               </div>
                             </div>
@@ -1541,19 +1485,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 
-                                       policy.id === 'INTEROP_STD' ? 47 : 
-                                       policy.id === 'INFRA_INVEST' ? 20 : 
-                                       policy.id === 'ACCESS_STD' ? 77 : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-orange"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = policy.id === 'INTEROP_STD' ? 47 : 
-                                                   policy.id === 'INFRA_INVEST' ? 20 : 
-                                                   policy.id === 'ACCESS_STD' ? 77 : 50;
+                                      const center = 50;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #ea580c ${center}%, #ea580c ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1569,50 +1508,30 @@ function App() {
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `${policy.id === 'INTEROP_STD' ? 47 : 
-                                         policy.id === 'INFRA_INVEST' ? 20 : 
-                                         policy.id === 'ACCESS_STD' ? 77 : 50}%`
+                                  left: `50%`
                                 }}
                               ></div>
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
-                                <span>{policy.id === 'INFRA_INVEST' ? '0%' : policy.id === 'ACCESS_STD' ? '50%' : '0'}</span>
-                                <span>{policy.id === 'INFRA_INVEST' ? '50%' : policy.id === 'ACCESS_STD' ? '100%' : '100'}</span>
+                                <span>0%</span>
+                                <span>100%</span>
                               </div>
                               <div className="flex justify-center mt-1">
                                 <div className="flex items-center space-x-1">
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={
-                                      policy.id === 'INTEROP_STD' ? (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 47) :
-                                      policy.id === 'INFRA_INVEST' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 20)) * 0.5) :
-                                      policy.id === 'ACCESS_STD' ? (50 + Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 77)) * 0.5)) :
-                                      (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50)
-                                    }
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                     onChange={(e) => {
-                                      const raw = Number(e.target.value);
-                                      let newIntensity = 50;
-                                      if (policy.id === 'INTEROP_STD') {
-                                        newIntensity = raw; // 0-100
-                                      } else if (policy.id === 'INFRA_INVEST') {
-                                        newIntensity = raw * 2; // percent 0-50 -> 0-100
-                                      } else if (policy.id === 'ACCESS_STD') {
-                                        newIntensity = Math.max(0, (raw - 50) * 2); // 50-100 -> 0-100
-                                      } else {
-                                        newIntensity = raw;
-                                      }
-                                      newIntensity = Math.max(0, Math.min(100, Math.round(newIntensity)));
+                                      const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
                                     }}
-                                    min={policy.id === 'ACCESS_STD' ? 50 : 0}
-                                    max={policy.id === 'INFRA_INVEST' ? 50 : 100}
+                                    min={0}
+                                    max={100}
                                     step={1}
                                   />
-                                  <span className="text-xs text-slate-500">
-                                    {policy.id === 'INFRA_INVEST' || policy.id === 'ACCESS_STD' ? '%' : ''}
-                                  </span>
+                                  <span className="text-xs text-slate-500">%</span>
                                 </div>
                               </div>
                             </div>
@@ -1644,19 +1563,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 
-                                       policy.id === 'STATE_FED_PART' ? 10 : 
-                                       policy.id === 'INNOV_SANDBOX' ? 45 : 
-                                       policy.id === 'MODEL_EVAL_STD' ? 65 : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-red"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = policy.id === 'STATE_FED_PART' ? 10 : 
-                                                   policy.id === 'INNOV_SANDBOX' ? 45 : 
-                                                   policy.id === 'MODEL_EVAL_STD' ? 65 : 50;
+                                      const center = 50;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #dc2626 ${center}%, #dc2626 ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1672,51 +1586,30 @@ function App() {
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `${policy.id === 'STATE_FED_PART' ? 10 : 
-                                         policy.id === 'INNOV_SANDBOX' ? 45 : 
-                                         policy.id === 'MODEL_EVAL_STD' ? 65 : 50}%`
+                                  left: `50%`
                                 }}
                               ></div>
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
-                                <span>{policy.id === 'STATE_FED_PART' ? '$0M' : '0'}</span>
-                                <span>{policy.id === 'STATE_FED_PART' ? '$100M' : '100'}</span>
+                                <span>0%</span>
+                                <span>100%</span>
                               </div>
                               <div className="flex justify-center mt-1">
                                 <div className="flex items-center space-x-1">
-                                  {policy.id === 'STATE_FED_PART' && (
-                                    <span className="text-xs text-slate-500">$</span>
-                                  )}
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={
-                                      policy.id === 'STATE_FED_PART' ? Math.round(((policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 10)) * 1) :
-                                      policy.id === 'INNOV_SANDBOX' ? (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 45) :
-                                      policy.id === 'MODEL_EVAL_STD' ? (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 65) :
-                                      (policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50)
-                                    }
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
                                     onChange={(e) => {
-                                      const raw = Number(e.target.value);
-                                      let newIntensity = 50;
-                                      if (policy.id === 'STATE_FED_PART') {
-                                        newIntensity = raw; // $M 0-100 -> 0-100
-                                      } else if (policy.id === 'INNOV_SANDBOX' || policy.id === 'MODEL_EVAL_STD') {
-                                        newIntensity = raw; // 0-100
-                                      } else {
-                                        newIntensity = raw;
-                                      }
-                                      newIntensity = Math.max(0, Math.min(100, Math.round(newIntensity)));
+                                      const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
                                     }}
                                     min={0}
                                     max={100}
                                     step={1}
                                   />
-                                  <span className="text-xs text-slate-500">
-                                    {policy.id === 'STATE_FED_PART' ? 'M' : ''}
-                                  </span>
+                                  <span className="text-xs text-slate-500">%</span>
                                 </div>
                               </div>
                             </div>

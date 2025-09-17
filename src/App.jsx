@@ -1498,7 +1498,7 @@ function App() {
 
                 {/* Bottom Section - Policy Levers */}
                 <div className="h-[28%] overflow-y-auto">
-                  <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-slate-100 shadow-sm p-2">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-lg border border-slate-100 shadow-sm p-2">
                     <div className="grid grid-cols-5 gap-2">
                       {/* Column 1 - District Administrator */}
                       <div className="space-y-1.5">
