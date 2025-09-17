@@ -554,7 +554,7 @@
 }
 
 .chart-container:hover {
-  @apply shadow-xl scale-[1.02] border-slate-300;
+  @apply shadow-xl scale-105 border-slate-300;
 }
 
 .chart-title {
@@ -667,7 +667,7 @@
 }
 
 .policy-slider:hover {
-  @apply shadow-lg transform scale-102;
+  @apply shadow-lg transform scale-105;
 }
 
 .policy-slider::-webkit-slider-thumb {
