@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
-import { policyDefinitions, outcomeMetrics, calculateCurrentMetrics, generateTimeSeriesData } from './lib/policyData'
+import { policyDefinitions, outcomeMetrics, calculateCurrentMetrics, generateTimeSeriesData, getCalculationBreakdown, getAssumptionsPanel } from './lib/policyData'
 
 // Time Series Chart Component
 function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities }) {
@@ -91,22 +91,191 @@ function SpiderChart({ selectedPolicies, policyIntensities }) {
   )
 }
 
+// Calculation Transparency Modal - shows how numbers are calculated
+const CalculationTransparencyModal = ({ isOpen, onClose, selectedPolicies, policyIntensities }) => {
+  if (!isOpen) return null;
+
+  const breakdown = getCalculationBreakdown(selectedPolicies, policyIntensities);
+  const assumptions = getAssumptionsPanel();
+
+  // Helper function to get policy display name
+  const getPolicyDisplayName = (policyId) => {
+    return policyDefinitions[policyId]?.name || policyId;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-overlay">
+      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto modal-content">
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">How the Numbers Work</h2>
+              <p className="text-slate-600 mt-1">Understanding how your policy choices create impact</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 text-2xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {/* Simple Overview */}
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-blue-800 mb-3">The Basic Formula</h3>
+              <div className="bg-white p-4 rounded border">
+                <div className="text-center text-lg font-mono text-gray-700 mb-3">
+                  Policy Impact = Base Effect × Intensity × Trust × Budget × Synergies - Tensions
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+                  <div><strong>Base Effect:</strong> Each policy has different strengths for different outcomes</div>
+                  <div><strong>Intensity:</strong> Higher slider settings = stronger effects (with diminishing returns)</div>
+                  <div><strong>Trust:</strong> AI policies work better when community trusts the school</div>
+                  <div><strong>Budget:</strong> Expensive policies get reduced when budget strain is high</div>
+                  <div><strong>Synergies:</strong> Some policy combinations work extra well together</div>
+                  <div><strong>Tensions:</strong> Some policy combinations create conflicts</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Policy Contributions */}
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-green-800 mb-3">Your Active Policies</h3>
+              <div className="grid gap-3">
+                {breakdown.policyContributions.map((contrib, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded border">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">{getPolicyDisplayName(contrib.policy)}</span>
+                      <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">{contrib.intensity}% intensity</span>
+                    </div>
+                    <div className="text-sm text-gray-600 mb-2">
+                      <strong>Policy Type:</strong> {contrib.category === 'governance' ? 'Governance & Safety' : contrib.category === 'capacity' ? 'Infrastructure & Capacity' : 'Culture & Community'}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      {Object.entries(contrib.contributions).map(([metric, value]) => {
+                        if (Math.abs(value) < 0.1) return null;
+                        return (
+                          <div key={metric} className="flex justify-between items-center">
+                            <span className="text-gray-700">{outcomeMetrics[metric]?.name || metric}:</span>
+                            <span className={`font-medium ${value > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {value > 0 ? '+' : ''}{value.toFixed(1)} points
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Synergy Effects */}
+            {breakdown.synergyEffects.length > 0 && (
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold text-purple-800 mb-3">Policy Synergies (Bonus Effects)</h3>
+                <p className="text-sm text-purple-700 mb-3">When two policies both have intensity ≥35%, they can create bonus effects together!</p>
+                <div className="grid gap-3">
+                  {breakdown.synergyEffects.slice(0, 5).map((synergy, idx) => (
+                    <div key={idx} className="bg-white p-3 rounded border">
+                      <div className="font-medium mb-2 text-purple-800">
+                        {synergy.policies.map(p => getPolicyDisplayName(p)).join(' + ')} 
+                        <span className="text-sm text-gray-600 ml-2">({synergy.intensities.join('%, ')}%)</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        {Object.entries(synergy.effects).map(([metric, value]) => {
+                          if (Math.abs(value) < 0.01) return null;
+                          return (
+                            <div key={metric} className="flex justify-between">
+                              <span className="text-gray-700">{outcomeMetrics[metric]?.name || metric}:</span>
+                              <span className={`font-medium ${value > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {value > 0 ? '+' : ''}{value.toFixed(1)} bonus
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Key Rules */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Key Rules That Keep Things Realistic</h3>
+              <div className="grid gap-4">
+                
+                <div className="bg-white p-3 rounded border">
+                  <h4 className="font-medium text-gray-800 mb-2">📈 Diminishing Returns</h4>
+                  <p className="text-sm text-gray-600">
+                    The higher a metric gets above 60, the harder it becomes to improve further. This reflects real-world challenges where initial gains are easier than perfection.
+                  </p>
+                </div>
+
+                <div className="bg-white p-3 rounded border">
+                  <h4 className="font-medium text-gray-800 mb-2">🎯 Annual Limits</h4>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Each metric can only change so much per year to keep things realistic:
+                  </p>
+                  <div className="grid grid-cols-2 gap-1 text-xs text-gray-600">
+                    <div>AI Literacy: max ±8 points/year</div>
+                    <div>Teacher Satisfaction: max ±6 points/year</div>
+                    <div>Community Trust: max ±6 points/year</div>
+                    <div>Digital Fairness: max ±6 points/year</div>
+                    <div>Innovation: max ±7 points/year</div>
+                    <div>AI Vulnerability: max ±10 points/year</div>
+                    <div>Budget Strain: max +10/-6 points/year</div>
+                    <div>Employability: max ±7 points/year</div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-3 rounded border">
+                  <h4 className="font-medium text-gray-800 mb-2">🤝 Trust Matters</h4>
+                  <p className="text-sm text-gray-600">
+                    AI-related policies (AI-Integration, Data Analytics Capacity, Innovation Research & Pilots) work better when Community Trust is high. Low trust = reduced effectiveness.
+                  </p>
+                </div>
+
+                <div className="bg-white p-3 rounded border">
+                  <h4 className="font-medium text-gray-800 mb-2">💰 Budget Reality</h4>
+                  <p className="text-sm text-gray-600">
+                    When Budget Strain gets above 70, expensive policies (Technology Infrastructure, Professional Development, etc.) become less effective as resources get stretched thin.
+                  </p>
+                </div>
+
+                <div className="bg-white p-3 rounded border">
+                  <h4 className="font-medium text-gray-800 mb-2">⚡ Synergy Gates</h4>
+                  <p className="text-sm text-gray-600">
+                    Policy combinations only create bonus effects when both policies are implemented at 35% intensity or higher. This encourages meaningful commitments rather than token efforts.
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Enhanced Impact Explanation Modal component - combining stakeholder journey stories and multi-perspective analysis
 const ImpactExplanationModal = ({ isOpen, onClose, selectedPolicies, policyIntensities }) => {
   if (!isOpen) return null
 
   const getImpactLevel = (intensity) => {
-    if (intensity >= 70) return { level: 'High', color: 'text-red-600', bg: 'bg-red-50', description: 'Aggressive implementation' }
-    if (intensity >= 40) return { level: 'Medium', color: 'text-amber-600', bg: 'bg-amber-50', description: 'Moderate implementation' }
-    return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50', description: 'Conservative implementation' }
+    if (intensity >= 75) return { level: 'High', color: 'text-red-600', bg: 'bg-red-50', description: 'High implementation' }
+    if (intensity >= 40) return { level: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50', description: 'Moderate implementation' }
+    return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50', description: 'Low implementation' }
   }
 
   const getStakeholderIcon = (stakeholder) => {
     const icons = {
       'District Administrator': '🏛️',
       'Educational Institution Leader': '🎓',
-      'Community Representative': '👥',
-      'EdTech Industry Representative': '💻',
+      'Community Leader': '👥',
+      'Industry Representative': '💻',
       'Research & Ethics Advisor': '🔬'
     }
     return icons[stakeholder] || '📋'
@@ -670,27 +839,881 @@ const StartScreenModal = ({ isOpen, onClose }) => {
   )
 }
 
+// Combined Explore Impacts Modal - combines both calculation transparency and impact explanation
+const ExploreImpactsModal = ({ isOpen, onClose, selectedPolicies, policyIntensities }) => {
+  const [activeTab, setActiveTab] = useState('impacts')
+
+  if (!isOpen) return null
+
+  const breakdown = getCalculationBreakdown(selectedPolicies, policyIntensities)
+  
+  // Helper function to get policy display name
+  const getPolicyDisplayName = (policyId) => {
+    return policyDefinitions[policyId]?.name || policyId
+  }
+
+  // Get active policies for impact stories
+  const activePolicies = selectedPolicies.map(policyId => {
+    const policy = policyDefinitions[policyId]
+    const intensity = policyIntensities[policyId] || 0
+    
+    return {
+      id: policyId,
+      name: policy?.name || policyId,
+      stakeholder: policy?.stakeholder || 'Unknown',
+      intensity,
+      ...getImpactLevel(intensity),
+      story: getJourneyStory(policyId, intensity),
+      perspectives: getPerspectiveAnalysis(policyId, intensity)
+    }
+  }).filter(p => p.intensity !== 0) // Only show policies that have been adjusted
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative">
+          {/* Header with close button */}
+          <div className="absolute top-6 right-6 z-10">
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-slate-600 hover:text-slate-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Header */}
+          <div className="bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800 text-white px-8 py-12 rounded-t-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📊</span>
+              </div>
+              <h1 className="text-3xl font-bold mb-3">Explore Impacts</h1>
+              <p className="text-lg text-emerald-100 max-w-2xl mx-auto">
+                Understand how your policy choices create change and see the calculations behind the impacts
+              </p>
+            </div>
+          </div>
+
+          <div className="p-8">
+            {/* Tab Navigation */}
+            <div className="flex mb-8 bg-slate-100 rounded-xl p-1">
+              <button
+                onClick={() => setActiveTab('impacts')}
+                className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  activeTab === 'impacts'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <span className="mr-2">🗺️</span>
+                Policy Impact Stories
+              </button>
+              <button
+                onClick={() => setActiveTab('calculations')}
+                className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  activeTab === 'calculations'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <span className="mr-2">⚙️</span>
+                How Numbers Work
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'impacts' && (
+              <div className="space-y-8">
+                {activePolicies.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🎛️</div>
+                    <h3 className="text-xl font-semibold text-slate-700 mb-2">No Policy Changes Yet</h3>
+                    <p className="text-slate-600">Adjust some policy levers to see their impact stories and stakeholder perspectives!</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Active Policies Overview */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
+                        <span className="mr-2">📊</span>Your Active Policy Changes
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {activePolicies.map((policy) => (
+                          <div key={policy.id} className={`p-4 rounded-lg border-2 ${policy.bg} border-opacity-50`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium">{getStakeholderIcon(policy.stakeholder)} {policy.stakeholder}</span>
+                              <span className={`text-xs font-bold px-2 py-1 rounded ${policy.color} bg-white bg-opacity-70`}>
+                                {policy.level}
+                              </span>
+                            </div>
+                            <h4 className="font-semibold text-slate-800">{policy.name}</h4>
+                            <p className="text-xs text-slate-600 mt-1">{policy.intensity}% intensity</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Journey Stories */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
+                        <span className="mr-2">🗺️</span>Impact Journey Stories
+                      </h3>
+                      <div className="space-y-6">
+                        {activePolicies.filter(p => p.story).map((policy) => (
+                          <div key={policy.id} className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border border-emerald-200">
+                            <div className="flex items-center mb-4">
+                              <div className={`w-3 h-3 rounded-full ${policy.bg} mr-3`}></div>
+                              <h4 className="font-bold text-slate-800 text-lg">{policy.story.title}</h4>
+                              <span className="ml-auto text-sm text-slate-600">{policy.intensity}% Implementation</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              {policy.story.steps.map((step, index) => (
+                                <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-slate-200">
+                                  <div className="text-center mb-3">
+                                    <div className="text-2xl mb-1">{step.icon}</div>
+                                    <div className="text-xs font-semibold text-slate-500">YEAR {step.year}</div>
+                                  </div>
+                                  <p className="text-sm text-slate-700 leading-relaxed">{step.text}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Multi-Perspective Analysis */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
+                        <span className="mr-2">👁️</span>Who&apos;s Affected & How
+                      </h3>
+                      <div className="space-y-4">
+                        {activePolicies.filter(p => p.perspectives).map((policy) => (
+                          <div key={policy.id} className="bg-white rounded-lg border border-slate-200 shadow-sm">
+                            <div className="bg-slate-50 px-6 py-3 border-b border-slate-200 rounded-t-lg">
+                              <h4 className="font-semibold text-slate-800 flex items-center">
+                                <span className="mr-2">{getStakeholderIcon(policy.stakeholder)}</span>
+                                {policy.name} Impact on Different Groups
+                              </h4>
+                            </div>
+                            <div className="p-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">🎓</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-blue-800 mb-1">Students</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.students}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">👨‍🏫</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-green-800 mb-1">Teachers</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.teachers}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="space-y-4">
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">👨‍👩‍👧‍👦</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-purple-800 mb-1">Parents</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.parents}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">🏛️</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-amber-800 mb-1">Administrators</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.administrators}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'calculations' && (
+              <div className="space-y-6">
+                {/* Simple Overview */}
+                <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200">
+                  <h3 className="text-xl font-semibold text-emerald-800 mb-4 flex items-center">
+                    <span className="mr-2">🧮</span>The Basic Formula
+                  </h3>
+                  <div className="bg-white p-4 rounded-lg border border-emerald-200">
+                    <div className="text-center text-lg font-mono text-gray-700 mb-3">
+                      Policy Impact = Base Effect × Intensity × Trust × Budget × Synergies - Tensions
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+                      <div><strong>Base Effect:</strong> Each policy has different strengths for different outcomes</div>
+                      <div><strong>Intensity:</strong> Higher slider settings = stronger effects (with diminishing returns)</div>
+                      <div><strong>Trust:</strong> AI policies work better when community trusts the school</div>
+                      <div><strong>Budget:</strong> Expensive policies get reduced when budget strain is high</div>
+                      <div><strong>Synergies:</strong> Some policy combinations work extra well together</div>
+                      <div><strong>Tensions:</strong> Some policy combinations create conflicts</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Policy Contributions */}
+                {breakdown.policyContributions.length > 0 && (
+                  <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                    <h3 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+                      <span className="mr-2">📋</span>Your Active Policies
+                    </h3>
+                    <div className="grid gap-4">
+                      {breakdown.policyContributions.map((contrib, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-lg border border-blue-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">{getPolicyDisplayName(contrib.policy)}</span>
+                            <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">{contrib.intensity}% intensity</span>
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            <strong>Policy Type:</strong> {contrib.category === 'governance' ? 'Governance & Safety' : contrib.category === 'capacity' ? 'Infrastructure & Capacity' : 'Culture & Community'}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            {Object.entries(contrib.contributions).map(([metric, value]) => {
+                              if (Math.abs(value) < 0.1) return null;
+                              return (
+                                <div key={metric} className="flex justify-between items-center">
+                                  <span className="text-gray-700">{outcomeMetrics[metric]?.name || metric}:</span>
+                                  <span className={`font-medium ${value > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {value > 0 ? '+' : ''}{value.toFixed(1)} points
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Synergy Effects */}
+                {breakdown.synergyEffects.length > 0 && (
+                  <div className="bg-purple-50 p-6 rounded-xl border border-purple-200">
+                    <h3 className="text-xl font-semibold text-purple-800 mb-4 flex items-center">
+                      <span className="mr-2">⚡</span>Policy Synergies (Bonus Effects)
+                    </h3>
+                    <p className="text-sm text-purple-700 mb-4">When two policies both have intensity ≥35%, they can create bonus effects together!</p>
+                    <div className="grid gap-3">
+                      {breakdown.synergyEffects.slice(0, 5).map((synergy, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
+                          <div className="font-medium mb-2 text-purple-800">
+                            {synergy.policies.map(p => getPolicyDisplayName(p)).join(' + ')} 
+                            <span className="text-sm text-gray-600 ml-2">({synergy.intensities.join('%, ')}%)</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            {Object.entries(synergy.effects).map(([metric, value]) => {
+                              if (Math.abs(value) < 0.01) return null;
+                              return (
+                                <div key={metric} className="flex justify-between">
+                                  <span className="text-gray-700">{outcomeMetrics[metric]?.name || metric}:</span>
+                                  <span className={`font-medium ${value > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {value > 0 ? '+' : ''}{value.toFixed(1)} bonus
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Rules */}
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">📏</span>Key Rules That Keep Things Realistic
+                  </h3>
+                  <div className="grid gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">📈</span>Diminishing Returns
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        The higher a metric gets above 60, the harder it becomes to improve further. This reflects real-world challenges where initial gains are easier than perfection.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">🎯</span>Annual Limits
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Each metric can only change so much per year to keep things realistic:
+                      </p>
+                      <div className="grid grid-cols-2 gap-1 text-xs text-gray-600">
+                        <div>AI Literacy: max ±8 points/year</div>
+                        <div>Teacher Satisfaction: max ±6 points/year</div>
+                        <div>Community Trust: max ±6 points/year</div>
+                        <div>Digital Equity: max ±6 points/year</div>
+                        <div>Innovation: max ±7 points/year</div>
+                        <div>AI Vulnerability: max ±10 points/year</div>
+                        <div>Budget Strain: max +10/-6 points/year</div>
+                        <div>Employment Impact: max ±7 points/year</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">🤝</span>Trust Matters
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        AI-related policies (AI-Integration, Data Analytics Capacity, Innovation Research & Pilots) work better when Community Trust is high. Low trust = reduced effectiveness.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">💰</span>Budget Reality
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        When Budget Strain gets above 70, expensive policies (Technology Infrastructure, Professional Development, etc.) become less effective as resources get stretched thin.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="mt-8 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-emerald-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <p className="text-lg font-semibold text-emerald-900">Understanding Your Impact</p>
+              </div>
+              <p className="text-slate-700">These insights help you make informed decisions about AI education policies and understand their interconnected effects.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// FAQ Modal Component with Collapsible Sections
+const FAQModal = ({ isOpen, onClose }) => {
+  const [openSections, setOpenSections] = useState({
+    purpose: false,
+    metrics: false,
+    calculations: false,
+    scenarios: false,
+    examples: false,
+    limits: false,
+    glossary: false
+  })
+
+  const toggleSection = (sectionKey) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }))
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative">
+          {/* Header with close button */}
+          <div className="absolute top-6 right-6 z-10">
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-slate-600 hover:text-slate-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Header */}
+          <div className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white px-8 py-12 rounded-t-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">❓</span>
+              </div>
+              <h1 className="text-3xl font-bold mb-3">Frequently Asked Questions</h1>
+              <p className="text-lg text-blue-100 max-w-2xl mx-auto">
+                Navigate through sections to find answers about using the AI Education Policy Simulator
+              </p>
+            </div>
+          </div>
+
+          <div className="p-8">
+            {/* Table of Contents */}
+            <div className="bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200 rounded-xl p-6 mb-8">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                Quick Navigation
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <button onClick={() => toggleSection('purpose')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  🎯 Purpose & Scope
+                </button>
+                <button onClick={() => toggleSection('metrics')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  📊 Metrics Overview
+                </button>
+                <button onClick={() => toggleSection('calculations')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  ⚙️ How It Works
+                </button>
+                <button onClick={() => toggleSection('scenarios')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  🎭 Scenarios & Timing
+                </button>
+                <button onClick={() => toggleSection('examples')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  💡 Examples
+                </button>
+                <button onClick={() => toggleSection('limits')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  ⚠️ Limitations
+                </button>
+                <button onClick={() => toggleSection('glossary')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  📚 Glossary
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Purpose and Scope */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('purpose')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">🎯</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Purpose and Scope</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.purpose ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.purpose && (
+                  <div className="px-6 py-4 space-y-4 border-t border-slate-100">
+                    <div className="bg-blue-50 border-l-4 border-blue-400 rounded-r-lg p-4">
+                      <h3 className="font-semibold text-blue-900 mb-2">What is this simulator for?</h3>
+                      <p className="text-slate-700">This tool helps workshop participants explore how different AI education policies might interact and create tradeoffs over time. It's designed for collaborative learning about policy decisions—not for making predictions about what will actually happen in your district.</p>
+                    </div>
+                    
+                    <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-lg p-4">
+                      <h3 className="font-semibold text-amber-900 mb-2">Is this a forecasting tool?</h3>
+                      <p className="text-slate-700">No. This simulator is exploratory, not predictive. It uses simplified models to help you think through &quot;what if&quot; scenarios and understand how policies might work together or against each other. The numbers show directions and relationships, not future outcomes.</p>
+                    </div>
+                    
+                    <div className="bg-green-50 border-l-4 border-green-400 rounded-r-lg p-4">
+                      <h3 className="font-semibold text-green-900 mb-2">What kinds of questions is it good/bad at answering?</h3>
+                      <p className="text-slate-700"><strong className="text-green-800">Good for:</strong> &quot;How might professional development and infrastructure investments work together?&quot; or &quot;What tradeoffs come with rapid AI adoption?&quot;</p>
+                      <p className="text-slate-700 mt-2"><strong className="text-red-700">Bad for:</strong> &quot;Will our test scores improve by 15%?&quot; or &quot;Should we buy this specific AI tool?&quot;</p>
+                    </div>
+                    
+                    <div className="bg-purple-50 border-l-4 border-purple-400 rounded-r-lg p-4">
+                      <h3 className="font-semibold text-purple-900 mb-2">How should results be interpreted in the workshop?</h3>
+                      <p className="text-slate-700">Use the results to spark discussion about policy priorities and tradeoffs. Focus on patterns—like whether metrics move in expected directions—rather than exact numbers. The goal is sense-making, not precise planning.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Metrics Overview */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('metrics')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📊</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Metrics Overview</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.metrics ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.metrics && (
+                  <div className="px-6 py-4 space-y-3 border-t border-slate-100">
+                    <div className="grid gap-3">
+                      {[
+                        {
+                          name: "AI Literacy",
+                          description: "How well students, teachers, and staff understand and can effectively use AI tools for learning and teaching.",
+                          drivers: "Professional Development and Digital Citizenship Education are the strongest drivers. Technology Infrastructure and AI Integration also help, especially when combined.",
+                          plateau: "Learning new technologies takes time, and without adequate teacher training or infrastructure, even good policies may not translate into classroom practice.",
+                          color: "blue"
+                        },
+                        {
+                          name: "Community Trust",
+                          description: "How much parents, students, and community members believe AI education initiatives will benefit students while protecting their interests.",
+                          drivers: "Student Protection Standards, Community Input, and Impact Reporting build trust most directly. Trust can drop when innovation moves too fast without transparency.",
+                          plateau: "Trust is built through consistent positive experiences over time. It can be damaged quickly but rebuilt slowly.",
+                          color: "green"
+                        },
+                        {
+                          name: "Innovation Index",
+                          description: "How effectively the district adopts and implements new AI tools and approaches that enhance teaching and learning.",
+                          drivers: "Innovation Research & Pilots and Technology Infrastructure are key drivers. Too many safety requirements without adequate support can slow innovation.",
+                          plateau: "Innovation requires both technical capacity and cultural readiness. Without teacher buy-in or adequate infrastructure, even well-funded initiatives may stall.",
+                          color: "purple"
+                        },
+                        {
+                          name: "Teacher Satisfaction",
+                          description: "How supported and effective teachers feel when working with AI tools and policies in their daily practice.",
+                          drivers: "Professional Development has the strongest impact, followed by Educator Autonomy and Technology Infrastructure. Satisfaction drops when policies feel restrictive.",
+                          plateau: "Teachers need time to adapt to new tools and policies. Satisfaction requires both adequate support and autonomy.",
+                          color: "amber"
+                        },
+                        {
+                          name: "Digital Equity",
+                          description: "How fairly AI education benefits reach all students, regardless of their background, abilities, or circumstances.",
+                          drivers: "Accessibility Standards and Digital Citizenship Education are primary drivers. Technology Infrastructure and Student Protection Standards also contribute.",
+                          plateau: "Achieving true equity requires sustained effort across multiple policies. Historical disparities take time to address.",
+                          color: "rose"
+                        },
+                        {
+                          name: "Budget Strain",
+                          description: "The financial pressure on the district from implementing AI education policies, including both direct costs and opportunity costs.",
+                          drivers: "Technology Infrastructure and Professional Development create the most strain. Some policies like Interoperability Standards can reduce strain over time.",
+                          plateau: "Budget impacts accumulate over time as policies are implemented. Initial investments may show high strain that decreases as efficiencies develop.",
+                          color: "gray"
+                        },
+                        {
+                          name: "Employment Impact",
+                          description: "How well AI education prepares students for future careers and helps them understand AI's impact on the job market.",
+                          drivers: "Job Market Alignment and AI Integration are key drivers. The effect is strongest when local employers are involved in shaping curriculum.",
+                          plateau: "Career preparation effects take years to materialize as students progress through school. The impact depends heavily on alignment between what schools teach and what employers need.",
+                          color: "cyan"
+                        },
+                        {
+                          name: "AI Vulnerability Index",
+                          description: "Risks from AI implementation, including data privacy concerns, algorithmic bias, over-dependence on AI tools, and security vulnerabilities. Lower numbers are better.",
+                          drivers: "Student Protection Standards and Model Evaluation Standards reduce vulnerability most directly. Rapid innovation without adequate safeguards can increase vulnerability.",
+                          plateau: "Security and safety improvements require systematic implementation across many systems. Some vulnerabilities are inherent to AI technology and can only be managed, not eliminated entirely.",
+                          color: "red"
+                        }
+                      ].map((metric, index) => (
+                        <div key={index} className={`bg-${metric.color}-50 border border-${metric.color}-200 rounded-lg p-4`}>
+                          <h3 className={`font-semibold text-${metric.color}-900 mb-2`}>{metric.name}</h3>
+                          <div className="space-y-2 text-sm">
+                            <p className="text-slate-700"><strong>What it measures:</strong> {metric.description}</p>
+                            <p className="text-slate-700"><strong>Key drivers:</strong> {metric.drivers}</p>
+                            <p className="text-slate-700"><strong>Why it might plateau:</strong> {metric.plateau}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* How Calculations Work */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('calculations')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 hover:from-slate-100 hover:to-gray-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">⚙️</span>
+                    <h2 className="text-xl font-semibold text-slate-800">How Calculations Work</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.calculations ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.calculations && (
+                  <div className="px-6 py-4 space-y-4 border-t border-slate-100">
+                    {[
+                      {
+                        question: "What's the starting point for the metrics?",
+                        answer: "All metrics start at 50 on a 0-100 scale, representing a neutral baseline where districts have basic capabilities but haven't yet implemented significant AI education policies."
+                      },
+                      {
+                        question: "How do policy sliders affect metrics?",
+                        answer: "Each policy has different strengths of impact on each metric. Moving a slider from 0% to 100% doesn't create a linear effect—the model uses a smooth curve so that early increases have more impact than later ones, reflecting how real-world policy implementation works."
+                      },
+                      {
+                        question: "What are \"diminishing returns\" and why are they used?",
+                        answer: "Diminishing returns means that as a metric gets higher, additional policies have less impact. For example, going from 50 to 70 on Teacher Satisfaction is easier than going from 70 to 90. This reflects reality—the last 10% improvement is always the hardest."
+                      },
+                      {
+                        question: "Why are there limits on how much a metric can change per round?",
+                        answer: "Real systems can't change instantly. We cap yearly changes (AI Literacy can increase by at most 8 points per year, Teacher Satisfaction by 6 points) to prevent unrealistic jumps and encourage thinking about multi-year strategies."
+                      },
+                      {
+                        question: "Why do some policies work better together (synergies)?",
+                        answer: "Certain policy combinations create bonus effects beyond what each would achieve alone. Professional Development plus Technology Infrastructure creates happier teachers because they have both training and tools. These bonuses only activate when both policies reach at least 35% intensity."
+                      },
+                      {
+                        question: "How do \"trust\" and \"budget pressure\" influence results?",
+                        answer: "When Community Trust is high, AI-related policies like Data Analytics and Innovation Research work better because people are more willing to try new approaches. When Budget Strain exceeds 70%, expensive policies become less effective as resources get stretched thin."
+                      }
+                    ].map((item, index) => (
+                      <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <h3 className="font-semibold text-gray-900 mb-2">{item.question}</h3>
+                        <p className="text-slate-700">{item.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Scenario Effects */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('scenarios')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">🎭</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Scenario Effects and Timing</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.scenarios ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.scenarios && (
+                  <div className="px-6 py-4 space-y-4 border-t border-slate-100">
+                    {[
+                      {
+                        question: "What do scenarios change?",
+                        answer: "Scenarios adjust the starting baseline for all metrics to reflect different challenging situations: Tool Bias Discovery (trust drops, vulnerability rises), Funding Cuts (budget strain increases, satisfaction drops), or Data Breach (trust plummets, vulnerability spikes)."
+                      },
+                      {
+                        question: "Why do different metrics respond at different speeds?",
+                        answer: "Some changes happen quickly (budget impacts, vulnerability from security breaches) while others take years (building AI literacy, establishing community trust). The model reflects these realistic timelines in how metrics respond to policies."
+                      },
+                      {
+                        question: "Can short-term drops lead to better long-term outcomes?",
+                        answer: "Yes. Implementing strong Student Protection Standards might initially slow Innovation Index as new processes are established, but it builds Community Trust and reduces AI Vulnerability over time, creating a more sustainable foundation for innovation."
+                      }
+                    ].map((item, index) => (
+                      <div key={index} className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <h3 className="font-semibold text-orange-900 mb-2">{item.question}</h3>
+                        <p className="text-slate-700">{item.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Practical Examples */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('examples')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">💡</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Practical Examples</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.examples ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.examples && (
+                  <div className="px-6 py-4 space-y-4 border-t border-slate-100">
+                    {[
+                      {
+                        title: "Professional Development + Technology Infrastructure",
+                        description: "Boosting Professional Development often increases Teacher Satisfaction and AI Literacy, but can raise Budget Strain; effects grow faster when paired with strong Infrastructure because teachers have both training and tools to succeed."
+                      },
+                      {
+                        title: "Innovation Research + Student Protection Standards",
+                        description: "Fast Innovation without Impact Reporting or Student Protection can raise the Innovation Index while lowering Community Trust and increasing AI Vulnerability, creating an unsustainable dynamic."
+                      },
+                      {
+                        title: "Interoperability Standards + Model Evaluation Standards",
+                        description: "These policies together can reduce Budget Strain over time by avoiding rework and vendor lock-in, even though each individually might increase costs initially."
+                      },
+                      {
+                        title: "Community Input + Rapid AI Integration",
+                        description: "Strong community engagement can slow initial AI adoption as concerns are addressed, but creates more sustainable long-term implementation with higher trust and lower vulnerability."
+                      }
+                    ].map((example, index) => (
+                      <div key={index} className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                        <h3 className="font-semibold text-indigo-900 mb-2">{example.title}</h3>
+                        <p className="text-slate-700">{example.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Limits and Responsible Use */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('limits')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-red-50 to-pink-50 hover:from-red-100 hover:to-pink-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">⚠️</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Limits and Responsible Use</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.limits ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.limits && (
+                  <div className="px-6 py-4 border-t border-slate-100">
+                    <div className="bg-red-50 border-l-4 border-red-400 rounded-r-lg p-6">
+                      <h3 className="font-semibold text-red-900 mb-4">What this simulator does NOT do:</h3>
+                      <ul className="list-disc list-inside space-y-2 text-slate-700 mb-6">
+                        <li>Predict specific outcomes for your district</li>
+                        <li>Forecast test scores or graduation rates</li>
+                        <li>Recommend particular vendors or tools</li>
+                        <li>Account for your unique local context</li>
+                        <li>Replace careful analysis of your specific situation</li>
+                      </ul>
+                      
+                      <h3 className="font-semibold text-red-900 mb-3">How to use results responsibly:</h3>
+                      <p className="text-slate-700">Use results to ask better questions: &quot;What if we prioritized teacher support over rapid innovation?&quot; or &quot;How might community engagement affect our AI strategy?&quot; Don&apos;t use results to justify specific budget requests or make definitive implementation decisions without additional analysis.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Glossary */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('glossary')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📚</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Glossary</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.glossary ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.glossary && (
+                  <div className="px-6 py-4 border-t border-slate-100">
+                    <div className="grid gap-3">
+                      {[
+                        {
+                          term: "Baseline",
+                          definition: "The starting point for each metric (50 out of 100) representing a typical district before implementing major AI education policies."
+                        },
+                        {
+                          term: "Diminishing Returns",
+                          definition: "The principle that additional improvements become harder to achieve as metrics get higher, requiring more effort for smaller gains."
+                        },
+                        {
+                          term: "Synergy",
+                          definition: "Bonus effects created when two policies work together more effectively than either would alone, activated when both policies reach at least 35% intensity."
+                        },
+                        {
+                          term: "Tension",
+                          definition: "Competing effects where policies work against each other, such as safety requirements reducing teacher autonomy or rapid innovation undermining community trust."
+                        },
+                        {
+                          term: "Trust Damping",
+                          definition: "The way low Community Trust reduces the effectiveness of AI-related policies by making stakeholders less willing to embrace new approaches."
+                        },
+                        {
+                          term: "Budget Damping",
+                          definition: "The way high Budget Strain (over 70) reduces the effectiveness of expensive policies as resources become constrained."
+                        }
+                      ].map((item, index) => (
+                        <div key={index} className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                          <h3 className="font-semibold text-slate-900 mb-1">{item.term}</h3>
+                          <p className="text-slate-700 text-sm">{item.definition}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-lg font-semibold text-blue-900">Remember</p>
+              </div>
+              <p className="text-slate-700">This tool supports sense-making about tradeoffs; it does not forecast real-world outcomes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [selectedPolicies, setSelectedPolicies] = useState([])
   const [policyIntensities, setPolicyIntensities] = useState({
-    DATA_ANALYTICS: 50,
-    PROTECT_STD: 50,
-    PD_FUNDS: 50,
-    EDUC_AUTONOMY: 50,
-    AI_INTEGRATION: 50,
-    DIGITAL_CITIZEN: 50,
-    COMM_INPUT: 50,
-    IMPACT_REP_STD: 50,
-    LOCAL_JOB_ALIGN: 50,
-    INTEROP_STD: 50,
-    INFRA_INVEST: 50,
-    ACCESS_STD: 50,
-    STATE_FED_PART: 50,
-    INNOV_SANDBOX: 50,
-    MODEL_EVAL_STD: 50
+    DATA_ANALYTICS: 0,
+    PROTECT_STD: 0,
+    PD_FUNDS: 0,
+    EDUC_AUTONOMY: 0,
+    AI_INTEGRATION: 0,
+    DIGITAL_CITIZEN: 0,
+    COMM_INPUT: 0,
+    IMPACT_REP_STD: 0,
+    LOCAL_JOB_ALIGN: 0,
+    INTEROP_STD: 0,
+    INFRA_INVEST: 0,
+    ACCESS_STD: 0,
+    STATE_FED_PART: 0,
+    INNOV_SANDBOX: 0,
+    MODEL_EVAL_STD: 0
   })
   const [selectedTimeSeriesMetrics, setSelectedTimeSeriesMetrics] = useState(['AI_LITERACY'])
-  const [activeTab, setActiveTab] = useState('main')
 
   // State initialization
   const [modalState, setModalState] = useState({
@@ -708,7 +1731,10 @@ function App() {
     resources: ''
   })
   const [impactExplanationModal, setImpactExplanationModal] = useState(false)
+  const [calculationTransparencyModal, setCalculationTransparencyModal] = useState(false)
   const [showStartScreen, setShowStartScreen] = useState(false)
+  const [showFAQ, setShowFAQ] = useState(false)
+  const [showExploreImpacts, setShowExploreImpacts] = useState(false)
   
   const defaultMetrics = useMemo(() => ({
     AI_LITERACY: 50,
@@ -723,11 +1749,6 @@ function App() {
 
   const [currentMetrics, setCurrentMetrics] = useState(defaultMetrics)
 
-  const tabs = [
-    { id: 'main', name: 'Main Dashboard' },
-    { id: 'feedback', name: 'System Feedback' },
-    { id: 'insights', name: 'Strategic Insights' }
-  ]
 
 
 
@@ -830,24 +1851,24 @@ function App() {
     })
   }
 
-  // Reset function to restore all policy levers to center position (50%)
+  // Reset function to restore all policy levers to 0% starting position
   const handleReset = () => {
     setPolicyIntensities({
-      DATA_ANALYTICS: 50,
-      PROTECT_STD: 50,
-      PD_FUNDS: 50,
-      EDUC_AUTONOMY: 50,
-      AI_INTEGRATION: 50,
-      DIGITAL_CITIZEN: 50,
-      COMM_INPUT: 50,
-      IMPACT_REP_STD: 50,
-      LOCAL_JOB_ALIGN: 50,
-      INTEROP_STD: 50,
-      INFRA_INVEST: 50,
-      ACCESS_STD: 50,
-      STATE_FED_PART: 50,
-      INNOV_SANDBOX: 50,
-      MODEL_EVAL_STD: 50
+      DATA_ANALYTICS: 0,
+      PROTECT_STD: 0,
+      PD_FUNDS: 0,
+      EDUC_AUTONOMY: 0,
+      AI_INTEGRATION: 0,
+      DIGITAL_CITIZEN: 0,
+      COMM_INPUT: 0,
+      IMPACT_REP_STD: 0,
+      LOCAL_JOB_ALIGN: 0,
+      INTEROP_STD: 0,
+      INFRA_INVEST: 0,
+      ACCESS_STD: 0,
+      STATE_FED_PART: 0,
+      INNOV_SANDBOX: 0,
+      MODEL_EVAL_STD: 0
     })
     setSelectedPolicies([])
     setSelectedTimeSeriesMetrics(['AI_LITERACY'])
@@ -997,15 +2018,29 @@ function App() {
             </div>
             <div className="flex items-center space-x-3">
               <button
+                onClick={() => setShowExploreImpacts(true)}
+                className="w-12 h-12 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 hover:text-emerald-900 rounded-full font-bold text-xl flex items-center justify-center shadow-md hover:shadow-lg border-2 border-emerald-200 hover:border-emerald-300 btn-professional"
+                title="Explore Impacts"
+              >
+                <span className="text-lg">📊</span>
+              </button>
+              <button
+                onClick={() => setShowFAQ(true)}
+                className="w-12 h-12 bg-purple-100 hover:bg-purple-200 text-purple-700 hover:text-purple-900 rounded-full font-bold text-xl flex items-center justify-center shadow-md hover:shadow-lg border-2 border-purple-200 hover:border-purple-300 btn-professional"
+                title="FAQ"
+              >
+                <span className="text-lg">❓</span>
+              </button>
+              <button
                 onClick={() => setShowStartScreen(true)}
                 className="w-12 h-12 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-900 rounded-full font-bold text-xl flex items-center justify-center shadow-md hover:shadow-lg border-2 border-blue-200 hover:border-blue-300 btn-professional"
                 title="Help & Instructions"
               >
-                <span className="font-bold">?</span>
+                <span className="text-lg">🎯</span>
               </button>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 rounded-lg font-medium text-sm flex items-center space-x-2 btn-professional"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm flex items-center space-x-2 transition-colors duration-200"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -1017,32 +2052,11 @@ function App() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white/60 backdrop-blur-sm border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex space-x-1">
-            {tabs.map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 text-sm font-semibold rounded-t-xl transition-all duration-200 ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-b from-blue-600 to-indigo-700 text-white shadow-xl'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
-                }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-3 h-[calc(100vh-120px)]">
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'main' && (
-            <div className="h-full p-2 space-y-1">
+          <div className="h-full p-2 space-y-1">
               {/* Top Section - Charts */}
               <div className="grid grid-cols-12 gap-4 h-[48%]">
                 {/* Time Series Chart */}
@@ -1099,12 +2113,6 @@ function App() {
                             </div>
                           </details>
                         </div>
-                        <button
-                          onClick={() => setImpactExplanationModal(true)}
-                          className="px-2 py-1 border border-slate-200 rounded text-xs cursor-pointer focus:ring-1 focus:ring-slate-400 focus:border-slate-400 bg-white/90 backdrop-blur-sm hover:bg-slate-50 transition-colors"
-                        >
-                          Why these impacts
-                        </button>
                     </div>
                     </div>
                     <div className="h-64 flex items-center justify-center">
@@ -1225,32 +2233,43 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-blue policy-slider"
-                                style={
-                                  policyIntensities[policy.id] !== undefined ? {
-                                    background: (() => {
-                                      const value = policyIntensities[policy.id];
-                                      const center = 50;
-                                      if (value > center) {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #2563eb ${center}%, #2563eb ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
-                                      } else {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${value}%, #2563eb ${value}%, #2563eb ${center}%, #e2e8f0 ${center}%, #e2e8f0 100%)`;
-                                      }
-                                    })()
-                                  } : {
-                                    background: '#e2e8f0'
+                                  style={
+                                    policyIntensities[policy.id] !== undefined ? {
+                                      background: (() => {
+                                        const value = policyIntensities[policy.id];
+                                        return `linear-gradient(to right, #2563eb 0%, #2563eb ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
+                                      })()
+                                    } : {
+                                      background: '#e2e8f0'
+                                    }
                                   }
-                                }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `50%`
+                                  left: `0%`
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `40%`
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `75%`
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
@@ -1262,7 +2281,7 @@ function App() {
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                     onChange={(e) => {
                                       const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
@@ -1303,14 +2322,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-green policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
+                                      const center = 0;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #16a34a ${center}%, #16a34a ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1322,13 +2341,29 @@ function App() {
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `50%`
+                                  left: `0%`
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `40%`
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `75%`
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
@@ -1340,7 +2375,7 @@ function App() {
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                     onChange={(e) => {
                                       const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
@@ -1358,7 +2393,7 @@ function App() {
                       ))}
                     </div>
 
-                    {/* Column 3 - Community Representative */}
+                    {/* Column 3 - Community Leader */}
                     <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-purple-100">Community</h3>
                       {Object.values(policyDefinitions).filter(policy => 
@@ -1381,14 +2416,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-purple policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
+                                      const center = 0;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #9333ea ${center}%, #9333ea ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1400,13 +2435,29 @@ function App() {
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `50%`
+                                  left: `0%`
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `40%`
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `75%`
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
@@ -1418,7 +2469,7 @@ function App() {
                                   <input
                                     type="number"
                                     className="w-20 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                     onChange={(e) => {
                                       const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
@@ -1436,7 +2487,7 @@ function App() {
                       ))}
                     </div>
 
-                    {/* Column 4 - EdTech Industry Representative */}
+                    {/* Column 4 - Industry Representative */}
                     <div className="space-y-1.5 stakeholder-card">
                       <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide text-center pb-0.5 border-b border-orange-100">Industry</h3>
                       {Object.values(policyDefinitions).filter(policy => 
@@ -1459,14 +2510,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-orange policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
+                                      const center = 0;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #ea580c ${center}%, #ea580c ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1478,13 +2529,29 @@ function App() {
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `50%`
+                                  left: `0%`
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `40%`
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `75%`
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
@@ -1496,7 +2563,7 @@ function App() {
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                     onChange={(e) => {
                                       const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
@@ -1537,14 +2604,14 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider-red policy-slider"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                     background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
+                                      const center = 0;
                                       if (value > center) {
                                         return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #dc2626 ${center}%, #dc2626 ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                       } else {
@@ -1556,13 +2623,29 @@ function App() {
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: `50%`
+                                  left: `0%`
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `40%`
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: `75%`
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between text-xs text-slate-500">
@@ -1574,7 +2657,7 @@ function App() {
                                   <input
                                     type="number"
                                     className="w-16 px-0.5 py-0.5 border-0 border-b border-transparent focus:border-slate-500 focus:outline-none bg-transparent text-xs text-slate-800 text-center"
-                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                    value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                     onChange={(e) => {
                                       const newIntensity = Math.max(0, Math.min(100, Math.round(Number(e.target.value))));
                                       handlePolicyIntensityChange(policy.id, newIntensity);
@@ -1594,20 +2677,6 @@ function App() {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'feedback' && (
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">System Feedback Loops</h2>
-              <p className="text-gray-600">System feedback analysis coming soon...</p>
-            </div>
-          )}
-
-          {activeTab === 'insights' && (
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Strategic Insights</h2>
-              <p className="text-gray-600">Strategic insights coming soon...</p>
             </div>
           )}
         </div>
@@ -1640,11 +2709,32 @@ function App() {
         selectedPolicies={selectedPolicies}
         policyIntensities={policyIntensities}
       />
+
+      <CalculationTransparencyModal
+        isOpen={calculationTransparencyModal}
+        onClose={() => setCalculationTransparencyModal(false)}
+        selectedPolicies={selectedPolicies}
+        policyIntensities={policyIntensities}
+      />
       
              {/* Start Screen Modal */}
        <StartScreenModal
          isOpen={showStartScreen}
          onClose={() => setShowStartScreen(false)}
+       />
+       
+       {/* FAQ Modal */}
+       <FAQModal
+         isOpen={showFAQ}
+         onClose={() => setShowFAQ(false)}
+       />
+       
+       {/* Explore Impacts Modal */}
+       <ExploreImpactsModal
+         isOpen={showExploreImpacts}
+         onClose={() => setShowExploreImpacts(false)}
+         selectedPolicies={selectedPolicies}
+         policyIntensities={policyIntensities}
        />
     </div>
   )
