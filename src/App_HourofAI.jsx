@@ -93,17 +93,17 @@ const ImpactExplanationModal = ({ isOpen, onClose, selectedPolicies, policyInten
   if (!isOpen) return null
 
   const getImpactLevel = (intensity) => {
-    if (intensity >= 70) return { level: 'High', color: 'text-red-600', bg: 'bg-red-50', description: 'Aggressive implementation' }
-    if (intensity >= 40) return { level: 'Medium', color: 'text-amber-600', bg: 'bg-amber-50', description: 'Moderate implementation' }
-    return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50', description: 'Conservative implementation' }
+    if (intensity >= 75) return { level: 'High', color: 'text-red-600', bg: 'bg-red-50', description: 'High implementation' }
+    if (intensity >= 40) return { level: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50', description: 'Moderate implementation' }
+    return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50', description: 'Low implementation' }
   }
 
   const getStakeholderIcon = (stakeholder) => {
     const icons = {
       'District Administrator': '🏛️',
       'Educational Institution Leader': '🎓',
-      'Community Representative': '👥',
-      'EdTech Industry Representative': '💻',
+      'Community Leader': '👥',
+      'Industry Representative': '💻',
       'Research & Ethics Advisor': '🔬'
     }
     return icons[stakeholder] || '📋'
@@ -711,7 +711,6 @@ function App() {
   const [selectedPolicies, setSelectedPolicies] = useState([])
   const [policyIntensities, setPolicyIntensities] = useState({})
   const [selectedTimeSeriesMetrics, setSelectedTimeSeriesMetrics] = useState(['AI_LITERACY'])
-  const [activeTab, setActiveTab] = useState('main')
 
   // State initialization
   const [modalState, setModalState] = useState({
@@ -1010,7 +1009,7 @@ function App() {
               </button>
               <button
                 onClick={handleReset}
-                className="fun-button flex items-center space-x-2 interactive-hover"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm flex items-center space-x-2 transition-colors duration-200"
               >
                 <svg className="w-5 h-5 icon-rotate" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
@@ -1022,43 +1021,11 @@ function App() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="bg-white/60 backdrop-blur-sm border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex space-x-1">
-            {tabs.map((tab) => (
-              <button 
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                    className={`px-6 py-3 text-sm font-bold rounded-t-2xl transition-all duration-300 flex items-center gap-2 interactive-hover ${
-                  activeTab === tab.id
-                        ? 'fun-tab text-white shadow-xl'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
-                }`}
-              >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      {tab.id === 'dashboard' ? (
-                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                      ) : tab.id === 'policies' ? (
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      ) : tab.id === 'feedback' ? (
-                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-                      ) : (
-                        <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4 0h-2v6h2v-6zm2.5-9H19V1h-2v1H7V1H5v1H4.5C3.67 2 3 2.67 3 3.5v15c0 .83.67 1.5 1.5 1.5h15c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM19 18.5H5V8h14v10.5z"/>
-                      )}
-                    </svg>
-                {tab.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-3 h-[calc(100vh-120px)]">
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'main' && (
-            <div className="h-full p-2 space-y-1">
+          <div className="h-full p-2 space-y-1">
               {/* Top Section - Charts */}
               <div className="grid grid-cols-12 gap-4 h-[48%]">
                 {/* Time Series Chart */}
@@ -1311,32 +1278,43 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full fun-slider district-slider appearance-none cursor-pointer"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                   background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
-                                      if (value > center) {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #2563eb ${center}%, #2563eb ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
-                                    } else {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${value}%, #2563eb ${value}%, #2563eb ${center}%, #e2e8f0 ${center}%, #e2e8f0 100%)`;
-                                    }
+                                      return `linear-gradient(to right, #2563eb 0%, #2563eb ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                   })()
                                   } : {
                                     background: '#e2e8f0'
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: '50%'
+                                  left: '0%'
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: '40%'
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: '75%'
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between items-center text-xs text-slate-500">
@@ -1409,32 +1387,43 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full fun-slider appearance-none cursor-pointer"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                   background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
-                                      if (value > center) {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #16a34a ${center}%, #16a34a ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
-                                    } else {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${value}%, #16a34a ${value}%, #16a34a ${center}%, #e2e8f0 ${center}%, #e2e8f0 100%)`;
-                                    }
+                                      return `linear-gradient(to right, #16a34a 0%, #16a34a ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                   })()
                                   } : {
                                     background: '#e2e8f0'
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: '50%'
+                                  left: '0%'
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: '40%'
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: '75%'
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between items-center text-xs text-slate-500">
@@ -1507,32 +1496,43 @@ function App() {
                                 type="range"
                                 min="0"
                                 max="100"
-                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 50}
+                                value={policyIntensities[policy.id] !== undefined ? policyIntensities[policy.id] : 0}
                                 onChange={(e) => handlePolicyIntensityChange(policy.id, parseInt(e.target.value))}
                                 className="w-full fun-slider appearance-none cursor-pointer"
                                 style={
                                   policyIntensities[policy.id] !== undefined ? {
                                   background: (() => {
                                       const value = policyIntensities[policy.id];
-                                      const center = 50;
-                                      if (value > center) {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${center}%, #9333ea ${center}%, #9333ea ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
-                                    } else {
-                                        return `linear-gradient(to right, #e2e8f0 0%, #e2e8f0 ${value}%, #9333ea ${value}%, #9333ea ${center}%, #e2e8f0 ${center}%, #e2e8f0 100%)`;
-                                    }
+                                      return `linear-gradient(to right, #9333ea 0%, #9333ea ${value}%, #e2e8f0 ${value}%, #e2e8f0 100%)`;
                                   })()
                                   } : {
                                     background: '#e2e8f0'
                                   }
                                 }
                               />
-                              {/* Center indicator */}
+                              {/* Implementation level markers */}
                               <div 
                                 className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
                                 style={{
-                                  left: '50%'
+                                  left: '0%'
                                 }}
+                                title="Low (0-39%)"
                               ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: '40%'
+                                }}
+                                title="Moderate (40-74%)"
+                              ></div>
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 w-0.5 h-4 bg-slate-400 pointer-events-none"
+                                style={{
+                                  left: '75%'
+                                }}
+                                title="High (75-100%)"
+                              ></div>
+                              
                             </div>
                             <div className="relative">
                               <div className="flex justify-between items-center text-xs text-slate-500">
@@ -1548,20 +1548,6 @@ function App() {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {activeTab === 'feedback' && (
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">System Feedback Loops</h2>
-              <p className="text-gray-600">System feedback analysis coming soon...</p>
-            </div>
-          )}
-
-          {activeTab === 'insights' && (
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Strategic Insights</h2>
-              <p className="text-gray-600">Strategic insights coming soon...</p>
             </div>
           )}
         </div>

@@ -1417,7 +1417,12 @@ function App() {
                           Impact Analysis
                         </h3>
                         <div className="flex items-center space-x-2">
-                          {/* Explore Impacts button temporarily removed for phased rebuild */}
+                          <button
+                            onClick={() => setImpactExplanationModal(true)}
+                            className="px-2 py-1 border border-slate-200 rounded text-xs cursor-pointer focus:ring-1 focus:ring-slate-400 focus:border-slate-400 bg-white/90 backdrop-blur-sm hover:bg-slate-50 transition-colors"
+                          >
+                            Explore Impacts
+                          </button>
                         </div>
                       </div>
                       <div className="h-64 flex items-center justify-center">

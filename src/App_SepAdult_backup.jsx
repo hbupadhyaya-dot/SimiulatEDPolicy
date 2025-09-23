@@ -841,6 +841,381 @@ const StartScreenModal = ({ isOpen, onClose }) => {
   )
 }
 
+// FAQ Modal Component with Collapsible Sections
+const FAQModal = ({ isOpen, onClose }) => {
+  const [openSections, setOpenSections] = useState({
+    purpose: false,
+    metrics: false,
+    calculations: false,
+    scenarios: false,
+    examples: false,
+    limits: false,
+    glossary: false
+  })
+
+  const toggleSection = (sectionKey) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }))
+  }
+
+  if (!isOpen) return null
+      intensity,
+      ...getImpactLevel(intensity),
+      story: getJourneyStory(policyId, intensity),
+      perspectives: getPerspectiveAnalysis(policyId, intensity)
+    }
+  }).filter(p => p.intensity !== 0) // Only show policies that have been adjusted
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative">
+          {/* Header with close button */}
+          <div className="absolute top-6 right-6 z-10">
+            <button
+              onClick={onClose}
+              className="w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-slate-600 hover:text-slate-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Header */}
+          <div className="bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800 text-white px-8 py-12 rounded-t-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">📊</span>
+              </div>
+              <h1 className="text-3xl font-bold mb-3">Explore Impacts</h1>
+              <p className="text-lg text-emerald-100 max-w-2xl mx-auto">
+                Understand how your policy choices create change and see the calculations behind the impacts
+              </p>
+            </div>
+          </div>
+
+          <div className="p-8">
+            {/* Tab Navigation */}
+            <div className="flex mb-8 bg-slate-100 rounded-xl p-1">
+              <button
+                onClick={() => setActiveTab('impacts')}
+                className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  activeTab === 'impacts'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <span className="mr-2">🗺️</span>
+                Policy Impact Stories
+              </button>
+              <button
+                onClick={() => setActiveTab('calculations')}
+                className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  activeTab === 'calculations'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                <span className="mr-2">⚙️</span>
+                How Numbers Work
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'impacts' && (
+              <div className="space-y-8">
+                {activePolicies.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🎛️</div>
+                    <h3 className="text-xl font-semibold text-slate-700 mb-2">No Policy Changes Yet</h3>
+                    <p className="text-slate-600">Adjust some policy levers to see their impact stories and stakeholder perspectives!</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Active Policies Overview */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
+                        <span className="mr-2">📊</span>Your Active Policy Changes
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {activePolicies.map((policy) => (
+                          <div key={policy.id} className={`p-4 rounded-lg border-2 ${policy.bg} border-opacity-50`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium">{getStakeholderIcon(policy.stakeholder)} {policy.stakeholder}</span>
+                              <span className={`text-xs font-bold px-2 py-1 rounded ${policy.color} bg-white bg-opacity-70`}>
+                                {policy.level}
+                              </span>
+                            </div>
+                            <h4 className="font-semibold text-slate-800">{policy.name}</h4>
+                            <p className="text-xs text-slate-600 mt-1">{policy.intensity}% intensity</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Journey Stories */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
+                        <span className="mr-2">🗺️</span>Impact Journey Stories
+                      </h3>
+                      <div className="space-y-6">
+                        {activePolicies.filter(p => p.story).map((policy) => (
+                          <div key={policy.id} className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 border border-emerald-200">
+                            <div className="flex items-center mb-4">
+                              <div className={`w-3 h-3 rounded-full ${policy.bg} mr-3`}></div>
+                              <h4 className="font-bold text-slate-800 text-lg">{policy.story.title}</h4>
+                              <span className="ml-auto text-sm text-slate-600">{policy.intensity}% Implementation</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              {policy.story.steps.map((step, index) => (
+                                <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-slate-200">
+                                  <div className="text-center mb-3">
+                                    <div className="text-2xl mb-1">{step.icon}</div>
+                                    <div className="text-xs font-semibold text-slate-500">YEAR {step.year}</div>
+                                  </div>
+                                  <p className="text-sm text-slate-700 leading-relaxed">{step.text}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Multi-Perspective Analysis */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center">
+                        <span className="mr-2">👁️</span>Who&apos;s Affected & How
+                      </h3>
+                      <div className="space-y-4">
+                        {activePolicies.filter(p => p.perspectives).map((policy) => (
+                          <div key={policy.id} className="bg-white rounded-lg border border-slate-200 shadow-sm">
+                            <div className="bg-slate-50 px-6 py-3 border-b border-slate-200 rounded-t-lg">
+                              <h4 className="font-semibold text-slate-800 flex items-center">
+                                <span className="mr-2">{getStakeholderIcon(policy.stakeholder)}</span>
+                                {policy.name} Impact on Different Groups
+                              </h4>
+                            </div>
+                            <div className="p-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">🎓</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-blue-800 mb-1">Students</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.students}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">👨‍🏫</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-green-800 mb-1">Teachers</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.teachers}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="space-y-4">
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">👨‍👩‍👧‍👦</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-purple-800 mb-1">Parents</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.parents}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-start">
+                                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                      <span className="text-sm">🏛️</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="font-medium text-amber-800 mb-1">Administrators</h5>
+                                      <p className="text-sm text-slate-700">{policy.perspectives.administrators}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'calculations' && (
+              <div className="space-y-6">
+                {/* Simple Overview */}
+                <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200">
+                  <h3 className="text-xl font-semibold text-emerald-800 mb-4 flex items-center">
+                    <span className="mr-2">🧮</span>The Basic Formula
+                  </h3>
+                  <div className="bg-white p-4 rounded-lg border border-emerald-200">
+                    <div className="text-center text-lg font-mono text-gray-700 mb-3">
+                      Policy Impact = Base Effect × Intensity × Trust × Budget × Synergies - Tensions
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-600">
+                      <div><strong>Base Effect:</strong> Each policy has different strengths for different outcomes</div>
+                      <div><strong>Intensity:</strong> Higher slider settings = stronger effects (with diminishing returns)</div>
+                      <div><strong>Trust:</strong> AI policies work better when community trusts the school</div>
+                      <div><strong>Budget:</strong> Expensive policies get reduced when budget strain is high</div>
+                      <div><strong>Synergies:</strong> Some policy combinations work extra well together</div>
+                      <div><strong>Tensions:</strong> Some policy combinations create conflicts</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Policy Contributions */}
+                {breakdown.policyContributions.length > 0 && (
+                  <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                    <h3 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+                      <span className="mr-2">📋</span>Your Active Policies
+                    </h3>
+                    <div className="grid gap-4">
+                      {breakdown.policyContributions.map((contrib, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-lg border border-blue-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">{getPolicyDisplayName(contrib.policy)}</span>
+                            <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">{contrib.intensity}% intensity</span>
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            <strong>Policy Type:</strong> {contrib.category === 'governance' ? 'Governance & Safety' : contrib.category === 'capacity' ? 'Infrastructure & Capacity' : 'Culture & Community'}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            {Object.entries(contrib.contributions).map(([metric, value]) => {
+                              if (Math.abs(value) < 0.1) return null;
+                              return (
+                                <div key={metric} className="flex justify-between items-center">
+                                  <span className="text-gray-700">{outcomeMetrics[metric]?.name || metric}:</span>
+                                  <span className={`font-medium ${value > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {value > 0 ? '+' : ''}{value.toFixed(1)} points
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Synergy Effects */}
+                {breakdown.synergyEffects.length > 0 && (
+                  <div className="bg-purple-50 p-6 rounded-xl border border-purple-200">
+                    <h3 className="text-xl font-semibold text-purple-800 mb-4 flex items-center">
+                      <span className="mr-2">⚡</span>Policy Synergies (Bonus Effects)
+                    </h3>
+                    <p className="text-sm text-purple-700 mb-4">When two policies both have intensity ≥35%, they can create bonus effects together!</p>
+                    <div className="grid gap-3">
+                      {breakdown.synergyEffects.slice(0, 5).map((synergy, idx) => (
+                        <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
+                          <div className="font-medium mb-2 text-purple-800">
+                            {synergy.policies.map(p => getPolicyDisplayName(p)).join(' + ')} 
+                            <span className="text-sm text-gray-600 ml-2">({synergy.intensities.join('%, ')}%)</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            {Object.entries(synergy.effects).map(([metric, value]) => {
+                              if (Math.abs(value) < 0.01) return null;
+                              return (
+                                <div key={metric} className="flex justify-between">
+                                  <span className="text-gray-700">{outcomeMetrics[metric]?.name || metric}:</span>
+                                  <span className={`font-medium ${value > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {value > 0 ? '+' : ''}{value.toFixed(1)} bonus
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Rules */}
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                  <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">📏</span>Key Rules That Keep Things Realistic
+                  </h3>
+                  <div className="grid gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">📈</span>Diminishing Returns
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        The higher a metric gets above 60, the harder it becomes to improve further. This reflects real-world challenges where initial gains are easier than perfection.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">🎯</span>Annual Limits
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Each metric can only change so much per year to keep things realistic:
+                      </p>
+                      <div className="grid grid-cols-2 gap-1 text-xs text-gray-600">
+                        <div>AI Literacy: max ±8 points/year</div>
+                        <div>Teacher Satisfaction: max ±6 points/year</div>
+                        <div>Community Trust: max ±6 points/year</div>
+                        <div>Digital Equity: max ±6 points/year</div>
+                        <div>Innovation: max ±7 points/year</div>
+                        <div>AI Vulnerability: max ±10 points/year</div>
+                        <div>Budget Strain: max +10/-6 points/year</div>
+                        <div>Employment Impact: max ±7 points/year</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">🤝</span>Trust Matters
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        AI-related policies (AI-Integration, Data Analytics Capacity, Innovation Research & Pilots) work better when Community Trust is high. Low trust = reduced effectiveness.
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                        <span className="mr-2">💰</span>Budget Reality
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        When Budget Strain gets above 70, expensive policies (Technology Infrastructure, Professional Development, etc.) become less effective as resources get stretched thin.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="mt-8 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <svg className="w-6 h-6 text-emerald-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <p className="text-lg font-semibold text-emerald-900">Understanding Your Impact</p>
+              </div>
+              <p className="text-slate-700">These insights help you make informed decisions about AI education policies and understand their interconnected effects.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// FAQ Modal Component with Collapsible Sections
 const FAQModal = ({ isOpen, onClose }) => {
   const [openSections, setOpenSections] = useState({
     purpose: false,
@@ -2306,6 +2681,7 @@ function App() {
                 </div>
               </div>
             </div>
+          )}
         </div>
       </div>
       
@@ -2360,7 +2736,7 @@ function App() {
        <ExploreImpactsModal
          isOpen={showExploreImpacts}
          onClose={() => setShowExploreImpacts(false)}
-         selectedPolicies={Object.keys(policyIntensities).map(policyId => ({
+         selectedPolicies={selectedPolicies.map(policyId => ({
            id: policyId,
            name: policyDefinitions[policyId]?.name || policyId,
            category: policyDefinitions[policyId]?.stakeholder || 'Unknown',
@@ -2371,16 +2747,16 @@ function App() {
            const baselineValue = 50;
            const delta = currentValue - baselineValue;
            
-           // Generate realistic contributions based on actual policy effects
+           // Generate mock contributions for demonstration
            const contributions = {
-             base: delta * 0.5,
+             base: delta * 0.4,
              intensity: delta * 0.3,
-             prereq: Math.abs(delta) > 2 ? delta * 0.1 : 0,
-             synergy: Math.abs(delta) > 3 ? delta * 0.15 : 0,
-             tension: Math.abs(delta) > 1 ? delta * 0.05 : 0,
-             trust: Math.abs(delta) > 1 ? delta * 0.08 : 0,
-             budget: Math.abs(delta) > 2 ? delta * 0.07 : 0,
-             diminish: Math.abs(delta) > 5 ? delta * 0.1 : 0
+             prereq: delta * 0.1,
+             synergy: delta * 0.1,
+             tension: delta * 0.05,
+             trust: delta * 0.03,
+             budget: delta * 0.02,
+             diminish: delta * 0.0
            };
            
            acc[metricId] = {
@@ -2391,410 +2767,9 @@ function App() {
            };
            return acc;
          }, {})}
-         synergies={(() => {
-           // Generate synergies based on the comprehensive catalog
-           const synergies = [];
-           const synergyCatalog = {
-             // District Administrator synergies
-             'DATA_ANALYTICS+AI_INTEGRATION': {
-               label: 'Data Analytics + AI Integration',
-               policies: ['DATA_ANALYTICS', 'AI_INTEGRATION'],
-               metrics: ['AI_LITERACY', 'INNOVATION_INDEX', 'EMPLOYMENT_IMPACT'],
-               threshold: 35,
-               description: 'Analytics turn classroom data into feedback for instruction',
-               rawImpact: { AI_LITERACY: 'large', INNOVATION_INDEX: 'medium', EMPLOYMENT_IMPACT: 'medium' }
-             },
-             'DATA_ANALYTICS+IMPACT_REPORTING': {
-               label: 'Data Analytics + Impact Reporting',
-               policies: ['DATA_ANALYTICS', 'IMPACT_REPORTING'],
-               metrics: ['COMMUNITY_TRUST', 'BUDGET_STRAIN'],
-               threshold: 35,
-               description: 'Converts insights into transparent outcomes',
-               rawImpact: { COMMUNITY_TRUST: 'large', BUDGET_STRAIN: 'small' }
-             },
-             'PD_FUNDS+EDUCATOR_AUTONOMY': {
-               label: 'Professional Development + Educator Autonomy',
-               policies: ['PD_FUNDS', 'EDUCATOR_AUTONOMY'],
-               metrics: ['TEACHER_SATISFACTION', 'AI_LITERACY', 'INNOVATION_INDEX'],
-               threshold: 35,
-               description: 'Autonomy becomes enablement with proper training',
-               rawImpact: { TEACHER_SATISFACTION: 'large', AI_LITERACY: 'medium', INNOVATION_INDEX: 'medium' }
-             },
-             'PD_FUNDS+AI_INTEGRATION': {
-               label: 'Professional Development + AI Integration',
-               policies: ['PD_FUNDS', 'AI_INTEGRATION'],
-               metrics: ['TEACHER_SATISFACTION', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Increases realized gains from AI tools',
-               rawImpact: { TEACHER_SATISFACTION: 'large', COMMUNITY_TRUST: 'medium' }
-             },
-             'PD_FUNDS+DIGITAL_CITIZENSHIP': {
-               label: 'Professional Development + Digital Citizenship',
-               policies: ['PD_FUNDS', 'DIGITAL_CITIZENSHIP'],
-               metrics: ['AI_LITERACY', 'COMMUNITY_TRUST', 'AI_VULNERABILITY_INDEX'],
-               threshold: 35,
-               description: 'Aligns staff practice with student norms',
-               rawImpact: { AI_LITERACY: 'medium', COMMUNITY_TRUST: 'medium', AI_VULNERABILITY_INDEX: 'small' }
-             },
-             'PROTECT_STD+MODEL_EVAL_STD': {
-               label: 'Student Protection + Model Evaluation',
-               policies: ['PROTECT_STD', 'MODEL_EVAL_STD'],
-               metrics: ['AI_VULNERABILITY_INDEX', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Coherent safety stack reduces vulnerabilities',
-               rawImpact: { AI_VULNERABILITY_INDEX: 'large', COMMUNITY_TRUST: 'medium' }
-             },
-             'PROTECT_STD+IMPACT_REPORTING': {
-               label: 'Student Protection + Impact Reporting',
-               policies: ['PROTECT_STD', 'IMPACT_REPORTING'],
-               metrics: ['COMMUNITY_TRUST', 'DIGITAL_EQUITY'],
-               threshold: 35,
-               description: 'Visible compliance elevates trust',
-               rawImpact: { COMMUNITY_TRUST: 'large', DIGITAL_EQUITY: 'medium' }
-             },
-             // Education Institution Leader synergies
-             'EDUCATOR_AUTONOMY+INNOV_SANDBOX': {
-               label: 'Educator Autonomy + Innovation Sandbox',
-               policies: ['EDUCATOR_AUTONOMY', 'INNOV_SANDBOX'],
-               metrics: ['INNOVATION_INDEX', 'TEACHER_SATISFACTION'],
-               threshold: 35,
-               description: 'Teacher-led sandboxes surface high-fit solutions',
-               rawImpact: { INNOVATION_INDEX: 'large', TEACHER_SATISFACTION: 'medium' }
-             },
-             'DIGITAL_CITIZENSHIP+AI_CURRICULUM': {
-               label: 'Digital Citizenship + AI Curriculum',
-               policies: ['DIGITAL_CITIZENSHIP', 'AI_CURRICULUM'],
-               metrics: ['AI_LITERACY', 'COMMUNITY_TRUST', 'AI_VULNERABILITY_INDEX'],
-               threshold: 35,
-               description: 'Pairs skills with norms for safe use',
-               rawImpact: { AI_LITERACY: 'large', COMMUNITY_TRUST: 'medium', AI_VULNERABILITY_INDEX: 'small' }
-             },
-             'DIGITAL_CITIZENSHIP+PROTECT_STD': {
-               label: 'Digital Citizenship + Student Protection',
-               policies: ['DIGITAL_CITIZENSHIP', 'PROTECT_STD'],
-               metrics: ['DIGITAL_EQUITY', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Reinforces safe, equitable use',
-               rawImpact: { DIGITAL_EQUITY: 'large', COMMUNITY_TRUST: 'medium' }
-             },
-             'AI_INTEGRATION+INFRA_INVEST': {
-               label: 'AI Integration + Technology Infrastructure',
-               policies: ['AI_INTEGRATION', 'INFRA_INVEST'],
-               metrics: ['INNOVATION_INDEX', 'AI_LITERACY', 'TEACHER_SATISFACTION'],
-               threshold: 35,
-               description: 'Reliability unlocks adoption',
-               rawImpact: { INNOVATION_INDEX: 'large', AI_LITERACY: 'medium', TEACHER_SATISFACTION: 'medium' }
-             },
-             'AI_INTEGRATION+INTEROP_STD': {
-               label: 'AI Integration + Interoperability Standards',
-               policies: ['AI_INTEGRATION', 'INTEROP_STD'],
-               metrics: ['BUDGET_STRAIN'],
-               threshold: 35,
-               description: 'Easier data flows reduce rework',
-               rawImpact: { BUDGET_STRAIN: 'medium' }
-             },
-             // Community Leader synergies
-             'COMMUNITY_INPUT+IMPACT_REPORTING': {
-               label: 'Community Input + Impact Reporting',
-               policies: ['COMMUNITY_INPUT', 'IMPACT_REPORTING'],
-               metrics: ['COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Two-way transparency builds trust',
-               rawImpact: { COMMUNITY_TRUST: 'large' }
-             },
-             'COMMUNITY_INPUT+PROTECT_STD': {
-               label: 'Community Input + Student Protection',
-               policies: ['COMMUNITY_INPUT', 'PROTECT_STD'],
-               metrics: ['COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Aligns privacy with local norms',
-               rawImpact: { COMMUNITY_TRUST: 'large' }
-             },
-             'IMPACT_REPORTING+MODEL_EVAL_STD': {
-               label: 'Impact Reporting + Model Evaluation',
-               policies: ['IMPACT_REPORTING', 'MODEL_EVAL_STD'],
-               metrics: ['COMMUNITY_TRUST', 'AI_VULNERABILITY_INDEX'],
-               threshold: 35,
-               description: 'Evidence and communication reinforce each other',
-               rawImpact: { COMMUNITY_TRUST: 'large', AI_VULNERABILITY_INDEX: 'medium' }
-             },
-             'JOB_MARKET+AI_CURRICULUM': {
-               label: 'Job Market Alignment + AI Curriculum',
-               policies: ['JOB_MARKET', 'AI_CURRICULUM'],
-               metrics: ['EMPLOYMENT_IMPACT', 'INNOVATION_INDEX', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Skills aligned to regional demand',
-               rawImpact: { EMPLOYMENT_IMPACT: 'large', INNOVATION_INDEX: 'medium', COMMUNITY_TRUST: 'medium' }
-             },
-             // Industry Representative synergies
-             'INTEROP_STD+INFRA_INVEST': {
-               label: 'Interoperability + Technology Infrastructure',
-               policies: ['INTEROP_STD', 'INFRA_INVEST'],
-               metrics: ['DIGITAL_EQUITY', 'BUDGET_STRAIN'],
-               threshold: 35,
-               description: 'Standards reduce vendor lock-in',
-               rawImpact: { DIGITAL_EQUITY: 'large', BUDGET_STRAIN: 'medium' }
-             },
-             'INTEROP_STD+MODEL_EVAL_STD': {
-               label: 'Interoperability + Model Evaluation',
-               policies: ['INTEROP_STD', 'MODEL_EVAL_STD'],
-               metrics: ['AI_VULNERABILITY_INDEX', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Common schemas simplify auditing',
-               rawImpact: { AI_VULNERABILITY_INDEX: 'medium', COMMUNITY_TRUST: 'medium' }
-             },
-             'ACCESS_STD+DIGITAL_CITIZENSHIP': {
-               label: 'Accessibility + Digital Citizenship',
-               policies: ['ACCESS_STD', 'DIGITAL_CITIZENSHIP'],
-               metrics: ['DIGITAL_EQUITY', 'AI_LITERACY', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Inclusive tools and norms',
-               rawImpact: { DIGITAL_EQUITY: 'large', AI_LITERACY: 'medium', COMMUNITY_TRUST: 'medium' }
-             },
-             // Research & Ethics Advisor synergies
-             'MODEL_EVAL_STD+PROTECT_STD': {
-               label: 'Model Evaluation + Student Protection',
-               policies: ['MODEL_EVAL_STD', 'PROTECT_STD'],
-               metrics: ['AI_VULNERABILITY_INDEX', 'COMMUNITY_TRUST'],
-               threshold: 35,
-               description: 'Comprehensive governance reduces risks',
-               rawImpact: { AI_VULNERABILITY_INDEX: 'large', COMMUNITY_TRUST: 'large' }
-             },
-             'MODEL_EVAL_STD+IMPACT_REPORTING': {
-               label: 'Model Evaluation + Impact Reporting',
-               policies: ['MODEL_EVAL_STD', 'IMPACT_REPORTING'],
-               metrics: ['COMMUNITY_TRUST', 'BUDGET_STRAIN'],
-               threshold: 35,
-               description: 'Measurable outcomes improve legitimacy',
-               rawImpact: { COMMUNITY_TRUST: 'large', BUDGET_STRAIN: 'medium' }
-             },
-             'INNOV_SANDBOX+PD_FUNDS': {
-               label: 'Innovation Sandbox + Professional Development',
-               policies: ['INNOV_SANDBOX', 'PD_FUNDS'],
-               metrics: ['AI_LITERACY', 'TEACHER_SATISFACTION'],
-               threshold: 35,
-               description: 'Pilot learnings feed training',
-               rawImpact: { AI_LITERACY: 'large', TEACHER_SATISFACTION: 'medium' }
-             },
-             'INNOV_SANDBOX+INFRA_INVEST': {
-               label: 'Innovation Sandbox + Technology Infrastructure',
-               policies: ['INNOV_SANDBOX', 'INFRA_INVEST'],
-               metrics: ['BUDGET_STRAIN'],
-               threshold: 35,
-               description: 'Controlled environments validate requirements',
-               rawImpact: { BUDGET_STRAIN: 'medium' }
-             }
-           };
-           
-           // Check for active synergies
-           selectedPolicies.forEach(policy1 => {
-             selectedPolicies.forEach(policy2 => {
-               if (policy1 !== policy2) {
-                 const intensity1 = policyIntensities[policy1] || 0;
-                 const intensity2 = policyIntensities[policy2] || 0;
-                 
-                 if (intensity1 >= 35 && intensity2 >= 35) {
-                   const key = `${policy1}+${policy2}`;
-                   const reverseKey = `${policy2}+${policy1}`;
-                   
-                   if (synergyCatalog[key]) {
-                     synergies.push({
-                       ...synergyCatalog[key],
-                       policies: [policy1, policy2],
-                       active: true
-                     });
-                   } else if (synergyCatalog[reverseKey]) {
-                     synergies.push({
-                       ...synergyCatalog[reverseKey],
-                       policies: [policy1, policy2],
-                       active: true
-                     });
-                   }
-                 }
-               }
-             });
-           });
-           
-           return synergies;
-         })()}
-         tensions={(() => {
-           // Generate tensions based on the comprehensive catalog
-           const tensions = [];
-           const tensionCatalog = {
-             // District Administrator tensions
-             'DATA_ANALYTICS+PROTECT_STD': {
-               label: 'Data Analytics vs Student Protection',
-               policies: ['DATA_ANALYTICS', 'PROTECT_STD'],
-               metrics: ['COMMUNITY_TRUST', 'BUDGET_STRAIN'],
-               severity: 'medium',
-               description: 'Purpose-limitation constraints can curb analytics scope',
-               mitigation: 'Use privacy-preserving methods and transparent consent processes'
-             },
-             'PD_FUNDS+INNOV_SANDBOX': {
-               label: 'Professional Development vs Innovation Pilots',
-               policies: ['PD_FUNDS', 'INNOV_SANDBOX'],
-               metrics: ['BUDGET_STRAIN'],
-               severity: 'medium',
-               description: 'Competing time and funds can fragment focus',
-               mitigation: 'Scope pilots carefully and stage PD to support pilot phases'
-             },
-             'PROTECT_STD+EDUCATOR_AUTONOMY': {
-               label: 'Student Protection vs Educator Autonomy',
-               policies: ['PROTECT_STD', 'EDUCATOR_AUTONOMY'],
-               metrics: ['TEACHER_SATISFACTION', 'INNOVATION_INDEX'],
-               severity: 'high',
-               description: 'Guardrails can feel restrictive without training',
-               mitigation: 'Provide clear rationale, quick approvals, and comprehensive PD'
-             },
-             // Education Institution Leader tensions
-             'EDUCATOR_AUTONOMY+PROTECT_STD': {
-               label: 'Educator Autonomy vs Student Protection',
-               policies: ['EDUCATOR_AUTONOMY', 'PROTECT_STD'],
-               metrics: ['TEACHER_SATISFACTION', 'COMMUNITY_TRUST'],
-               severity: 'high',
-               description: 'Tool approval and data rules can constrain choices',
-               mitigation: 'Create transparent rationale and provide PD to protect satisfaction'
-             },
-             'AI_INTEGRATION+MODEL_EVAL_STD': {
-               label: 'AI Integration vs Model Evaluation',
-               policies: ['AI_INTEGRATION', 'MODEL_EVAL_STD'],
-               metrics: ['COMMUNITY_TRUST', 'AI_VULNERABILITY_INDEX'],
-               severity: 'medium',
-               description: 'Fast rollout vs evidence and monitoring',
-               mitigation: 'Sequence evaluation before integration, use staged rollouts'
-             },
-             // Community Leader tensions
-             'COMMUNITY_INPUT+INNOV_SANDBOX': {
-               label: 'Community Input vs Innovation Pilots',
-               policies: ['COMMUNITY_INPUT', 'INNOV_SANDBOX'],
-               metrics: ['COMMUNITY_TRUST'],
-               severity: 'medium',
-               description: 'Experimentation without clear engagement reduces trust',
-               mitigation: 'Require opt-in processes and clear communication about pilot scope'
-             },
-             'JOB_MARKET+PROTECT_STD': {
-               label: 'Job Market Alignment vs Student Protection',
-               policies: ['JOB_MARKET', 'PROTECT_STD'],
-               metrics: ['COMMUNITY_TRUST'],
-               severity: 'medium',
-               description: 'Data needs can clash with privacy norms',
-               mitigation: 'Use privacy-preserving analytics and establish clear guardrails'
-             },
-             // Industry Representative tensions
-             'INTEROP_STD+EDUCATOR_AUTONOMY': {
-               label: 'Interoperability vs Educator Autonomy',
-               policies: ['INTEROP_STD', 'EDUCATOR_AUTONOMY'],
-               metrics: ['TEACHER_SATISFACTION'],
-               severity: 'medium',
-               description: 'Approved lists may narrow tool choice',
-               mitigation: 'Create flexible pathways and fast-track approvals'
-             },
-             'ACCESS_STD+INNOV_SANDBOX': {
-               label: 'Accessibility vs Innovation Pilots',
-               policies: ['ACCESS_STD', 'INNOV_SANDBOX'],
-               metrics: ['BUDGET_STRAIN'],
-               severity: 'medium',
-               description: 'Universal design adds time/effort to pilot timelines',
-               mitigation: 'Phase accessibility requirements and secure targeted funding'
-             },
-             // Research & Ethics Advisor tensions
-             'EXTERNAL_FUNDING+SUSTAINABILITY': {
-               label: 'External Funding vs Sustainability',
-               policies: ['EXTERNAL_FUNDING', 'SUSTAINABILITY'],
-               metrics: ['COMMUNITY_TRUST', 'BUDGET_STRAIN'],
-               severity: 'high',
-               description: 'Pilot wind-downs can create cliff effects',
-               mitigation: 'Plan for operational continuity and gradual transition to sustainable funding'
-             },
-             // Cross-cutting tensions
-             'AI_INTEGRATION+PROTECT_STD': {
-               label: 'Speed vs Safety',
-               policies: ['AI_INTEGRATION', 'PROTECT_STD'],
-               metrics: ['COMMUNITY_TRUST', 'AI_VULNERABILITY_INDEX', 'BUDGET_STRAIN'],
-               severity: 'high',
-               description: 'Fast AI integration without proper safety measures',
-               mitigation: 'Implement safety-first approach with staged rollouts and continuous monitoring'
-             },
-             'PROTECT_STD+MODEL_EVAL_STD': {
-               label: 'Compliance without Capacity',
-               policies: ['PROTECT_STD', 'MODEL_EVAL_STD'],
-               metrics: ['TEACHER_SATISFACTION'],
-               severity: 'high',
-               description: 'Heavy compliance without proper training and support',
-               mitigation: 'Provide comprehensive PD and support systems before implementing strict standards'
-             },
-             'INFRA_INVEST+ACCESS_STD+PROTECT_STD': {
-               label: 'Cost Stack',
-               policies: ['INFRA_INVEST', 'ACCESS_STD', 'PROTECT_STD'],
-               metrics: ['BUDGET_STRAIN'],
-               severity: 'high',
-               description: 'Multiple high-cost policies implemented simultaneously',
-               mitigation: 'Phase implementation and secure targeted external funding'
-             },
-             'EDUCATOR_AUTONOMY+INTEROP_STD': {
-               label: 'Autonomy vs Governance',
-               policies: ['EDUCATOR_AUTONOMY', 'INTEROP_STD'],
-               metrics: ['TEACHER_SATISFACTION'],
-               severity: 'medium',
-               description: 'Strict governance can constrain teacher autonomy',
-               mitigation: 'Create fast-track approval processes and clear rationale for restrictions'
-             },
-           };
-           
-           // Check for active tensions
-           selectedPolicies.forEach(policy1 => {
-             selectedPolicies.forEach(policy2 => {
-               if (policy1 !== policy2) {
-                 const key = `${policy1}+${policy2}`;
-                 const reverseKey = `${policy2}+${policy1}`;
-                 
-                 if (tensionCatalog[key]) {
-                   tensions.push({
-                     ...tensionCatalog[key],
-                     policies: [policy1, policy2]
-                   });
-                 } else if (tensionCatalog[reverseKey]) {
-                   tensions.push({
-                     ...tensionCatalog[reverseKey],
-                     policies: [policy1, policy2]
-                   });
-                 }
-               }
-             });
-           });
-           
-           return tensions;
-         })()}
-         loops={(() => {
-           // Generate feedback loops based on current metrics
-           const loops = [];
-           
-           if (currentMetrics.TEACHER_SATISFACTION > 60 && currentMetrics.AI_LITERACY > 60) {
-             loops.push({
-               id: 'teacher-ai-loop',
-               type: 'reinforcing',
-               summary: 'High teacher satisfaction leads to better AI integration, which improves student AI literacy, further boosting teacher confidence and satisfaction.'
-             });
-           }
-           
-           if (currentMetrics.COMMUNITY_TRUST > 60 && currentMetrics.DIGITAL_EQUITY > 60) {
-             loops.push({
-               id: 'trust-equity-loop', 
-               type: 'reinforcing',
-               summary: 'Strong community trust enables more equitable AI access, which builds further trust as all students benefit equally from AI tools.'
-             });
-           }
-           
-           if (currentMetrics.BUDGET_STRAIN > 70) {
-             loops.push({
-               id: 'budget-constraint-loop',
-               type: 'balancing', 
-               summary: 'High budget strain limits expensive policy implementation, naturally preventing over-extension and forcing prioritization of most effective policies.'
-             });
-           }
-           
-           return loops;
-         })()}
+         synergies={[]} // Will be populated with actual synergy data
+         tensions={[]} // Will be populated with actual tension data
+         loops={[]} // Will be populated with actual loop data
          scenario={{ id: 'baseline', name: 'Baseline', severity: 1.0 }}
          strategy={null} // Will be computed by the modal
        />
