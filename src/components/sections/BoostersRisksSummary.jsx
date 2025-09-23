@@ -29,7 +29,7 @@ export function BoostersRisksSummary({ boosters = [] }) {
   const getDirectionIcon = (direction) => {
     switch (direction) {
       case 'up': return <IconUp className="w-4 h-4" />;
-      case 'down': return <IconDown className="w-4 h-4" />;
+      case 'down': return <IconUp className="w-4 h-4 rotate-180" />;
       default: return <span className="w-4 h-4 text-gray-400">↔</span>;
     }
   };

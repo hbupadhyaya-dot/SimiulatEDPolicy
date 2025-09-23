@@ -7,7 +7,6 @@ import { FeedbackMiniStories } from './sections/FeedbackMiniStories';
 import { MetricImpactsList } from './sections/MetricImpactsList';
 import { AssumptionsPanel } from './sections/AssumptionsPanel';
 import { CopyToClipboard } from './shared/CopyToClipboard';
-import { Badge } from './shared/Badge';
 import { 
   classifyStrategy, 
   scaleScenarioImpacts, 
@@ -123,7 +122,6 @@ export function ExploreImpactsModal({
   
   // Generate copy summary
   const generateCopySummary = () => {
-    const topBooster = boosters[0];
     const topSynergy = synergies.find(s => s.active);
     
     let summary = `AI Education Policy Strategy Analysis\n`;
@@ -224,7 +222,6 @@ export function ExploreImpactsModal({
               clusterScores={strategyData.clusterScores}
               confidence={strategyData.confidence}
               alternatives={alternatives}
-              selectedPolicies={selectedPolicies}
             />
             
             <BoostersRisksSummary
@@ -329,9 +326,9 @@ export function ExploreImpactsModal({
                       <h4 className="font-semibold text-gray-900 mb-3">Policy Intensity Insights</h4>
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                         <div className="text-sm text-amber-800 space-y-2">
-                          <p><strong>High Implementation Policies:</strong> {selectedPolicies.filter(p => (p.intensity || 0) >= 35).length} out of {selectedPolicies.length} policies are above the high implementation threshold (35% intensity).</p>
-                          <p><strong>Average Implementation:</strong> {Math.round(selectedPolicies.reduce((sum, p) => sum + (p.intensity || 0), 0) / selectedPolicies.length)}% across all policies.</p>
-                          <p><strong>Strategic Balance:</strong> {Object.values(strategyData.clusterScores).filter(score => score > 5).length} out of 3 strategic clusters are actively contributing to your approach.</p>
+                          <p><strong>Active Policies:</strong> {selectedPolicies.filter(p => (p.intensity || 0) >= 35).length} out of {selectedPolicies.length} policies are above the activation threshold (35% intensity).</p>
+                          <p><strong>Average Intensity:</strong> {Math.round(selectedPolicies.reduce((sum, p) => sum + (p.intensity || 0), 0) / selectedPolicies.length)}% across all selected policies.</p>
+                          <p><strong>Strategic Balance:</strong> {Object.values(strategyData.clusterScores).filter(score => score > 0).length} out of 3 strategic clusters are actively contributing to your approach.</p>
                         </div>
                       </div>
                     </div>

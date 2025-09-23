@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from '../shared/Badge';
 import { thresholdBadge } from '../../utils/exploreImpactsUtils';
+import { outcomeMetrics } from '../../lib/policyData';
 
 /**
  * SynergiesList component for displaying policy synergies
@@ -12,6 +13,10 @@ export function SynergiesList({ synergies = [], selectedPolicies = [] }) {
   const getPolicyName = (policyId) => {
     const policy = selectedPolicies.find(p => p.id === policyId);
     return policy ? policy.name : policyId;
+  };
+
+  const getMetricName = (metricKey) => {
+    return outcomeMetrics[metricKey]?.name || metricKey;
   };
 
   const getThresholdStatus = (synergy) => {
@@ -84,7 +89,7 @@ export function SynergiesList({ synergies = [], selectedPolicies = [] }) {
                 
                 <div className="space-y-3">
                   <div className="text-sm text-gray-600">
-                    <strong>Affected metrics:</strong> {synergy.metrics.join(', ')}
+                    <strong>Affected Outcomes:</strong> {synergy.metrics.map(getMetricName).join(', ')}
                   </div>
                   
                   <div className="flex flex-wrap gap-2">
@@ -96,7 +101,7 @@ export function SynergiesList({ synergies = [], selectedPolicies = [] }) {
                           variant={badge.variant}
                           size="sm"
                         >
-                          {metric}: {badge.text}
+                          {getMetricName(metric)}: {badge.text}
                         </Badge>
                       );
                     })}
@@ -104,7 +109,7 @@ export function SynergiesList({ synergies = [], selectedPolicies = [] }) {
                   
                   {/* Add specific explanation for each synergy */}
                   <div className="text-sm text-gray-700 bg-white p-3 rounded border">
-                    <p><strong>Why this works:</strong> {synergy.description}</p>
+                    <p><strong>Why this works:</strong> {synergy.whyThisHappens || synergy.description}</p>
                   </div>
                   
                   {synergy.capped && (

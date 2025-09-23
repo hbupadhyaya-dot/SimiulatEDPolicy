@@ -1,20 +1,24 @@
 // Utility functions for Explore Impacts feature
 
 /**
- * Classify strategy based on all policies and their intensities (all policies are always "selected", only intensity varies)
+ * Classify strategy based on selected policies and their intensities
  * @param {Array} selectedPolicies - Array of policy objects with id, name, category, intensity
  * @returns {Object} - { label, rationale, clusterScores, confidence }
  */
 export function classifyStrategy(selectedPolicies) {
   // All policies are always selected, so we don't need a minimum count check
-  // Instead, check if we have any policies with meaningful intensity
-  const activePolicies = selectedPolicies.filter(p => (p.intensity || 0) > 0);
+  // Instead, check if we have any policies with meaningful implementation level
+  const activePolicies = selectedPolicies.filter(p => p && (p.intensity || 0) > 0);
   
   if (activePolicies.length < 3) {
     return {
       label: "Insufficient Implementation",
-      rationale: "Need at least 3 policies with intensity > 0% to analyze strategy patterns. All policies are available - adjust their implementation levels.",
-      clusterScores: {},
+      rationale: "Need at least 3 policies with implementation level > 0% to analyze strategy patterns. All policies are available - adjust their implementation levels.",
+      clusterScores: {
+        governance: 0,
+        capacity: 0,
+        culture: 0
+      },
       confidence: "low"
     };
   }
@@ -43,7 +47,7 @@ export function classifyStrategy(selectedPolicies) {
     let policyCount = 0;
 
     selectedPolicies.forEach(policy => {
-      if (cluster.policies.includes(policy.id)) {
+      if (policy && policy.id && cluster.policies.includes(policy.id)) {
         totalIntensity += policy.intensity || 0; // All policies count, 0 intensity is valid
         policyCount++;
       }
@@ -59,7 +63,6 @@ export function classifyStrategy(selectedPolicies) {
 
   // Generate strategy label and rationale
   let label, rationale;
-  const avgIntensity = selectedPolicies.reduce((sum, p) => sum + (p.intensity || 0), 0) / selectedPolicies.length;
 
   if (maxScore < 30) {
     label = "Conservative Approach";

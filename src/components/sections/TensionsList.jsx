@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge } from '../shared/Badge';
+import { outcomeMetrics } from '../../lib/policyData';
 
 /**
  * TensionsList component for displaying policy tensions
@@ -11,6 +12,10 @@ export function TensionsList({ tensions = [], selectedPolicies = [] }) {
   const getPolicyName = (policyId) => {
     const policy = selectedPolicies.find(p => p.id === policyId);
     return policy ? policy.name : policyId;
+  };
+
+  const getMetricName = (metricKey) => {
+    return outcomeMetrics[metricKey]?.name || metricKey;
   };
 
   const getSeverityVariant = (severity) => {
@@ -68,12 +73,12 @@ export function TensionsList({ tensions = [], selectedPolicies = [] }) {
               
               <div className="space-y-3">
                 <div className="text-sm text-gray-600">
-                  <strong>Affected metrics:</strong> {tension.metrics.join(', ')}
+                  <strong>Affected Outcomes:</strong> {tension.metrics.map(getMetricName).join(', ')}
                 </div>
                 
                 {/* Add specific explanation for each tension */}
                 <div className="text-sm text-gray-700 bg-white p-3 rounded border">
-                  <p><strong>Why this happens:</strong> {tension.description}</p>
+                  <p><strong>Why this happens:</strong> {tension.whyThisHappens || tension.description}</p>
                 </div>
                 
                 {tension.mitigation && (

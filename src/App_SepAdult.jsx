@@ -1620,7 +1620,7 @@ function App() {
       'EDUC_AUTONOMY': '• Maintain Teacher Autonomy While Adopting AI Schoolwide: https://sais.org/resource/maintain-teacher-autonomy-while-adopting-ai-schoolwide/\n• Empowering ELA Teachers: Recommendations for Teacher Education in the AI Era: https://citejournal.org/volume-25/issue-1-25/english-language-arts/empowering-ela-teachers-recommendations-for-teacher-education-in-the-ai-era/\n• Autonomy in the Spaces: Teacher Autonomy, Scripted Lessons, and the Changing Role of Teachers: https://www.tandfonline.com/doi/full/10.1080/00220272.2023.2297229',
       'AI_CAREER_PATH': '• Riding the AI Wave: What\'s Happening in K-12 Education?: https://cset.georgetown.edu/article/riding-the-ai-wave-whats-happening-in-k-12-education/\n• Career Education Evolves to Meet Emerging Technology Demands: https://www.k12dive.com/news/career-education-evolves-emerging-technology-demands/743593/',
       'DIGITAL_CITIZEN': '• What You Need to Know About UNESCO\'s New AI Competency Frameworks for Students and Teachers: https://www.unesco.org/en/articles/what-you-need-know-about-unescos-new-ai-competency-frameworks-students-and-teachers\n• Digital Citizenship in Education (ISTE): https://iste.org/digital-citizenship\n• OECD AI Literacy Framework: https://ailiteracyframework.org/',
-      'DATA_ANALYTICS': '• How Districts are Using Data to Improve Educational Equity: https://digitalpromise.org/2022/08/23/how-districts-are-using-data-to-improve-educational-equity/\n• How Data Drives Strategies for Improved Student Outcomes: https://www.edsurge.com/news/2024-04-10-how-data-drives-strategies-for-improved-student-outcomes',
+      'DATA_ANALYTICS': '• Data Analytics in Education: A Comprehensive Guide: https://www.edweek.org/technology/data-analytics-in-education-a-comprehensive-guide/2024/03\n• Using Data to Improve Student Outcomes: https://www.oecd.org/en/publications/using-data-to-improve-student-outcomes_2024_c74f03de-en.html\n• Education Data Analytics: Best Practices and Implementation: https://www.cosn.org/education-data-analytics-best-practices/',
       'AI_INTEGRATION': '• AI Integration in Education: A Practical Guide: https://www.iste.org/ai-integration-guide\n• Seamless AI Integration: Best Practices for Schools: https://www.edtechmagazine.com/k12/article/2024/08/seamless-ai-integration-best-practices-schools\n• AI Workflow Integration in Educational Settings: https://www.oecd.org/en/publications/ai-workflow-integration-educational-settings_2024_c74f03de-en.html'
     }
     return resources[policyId] || 'Resources not available.'
@@ -2306,6 +2306,7 @@ function App() {
                 </div>
               </div>
             </div>
+          )}
         </div>
       </div>
       
@@ -2360,7 +2361,7 @@ function App() {
        <ExploreImpactsModal
          isOpen={showExploreImpacts}
          onClose={() => setShowExploreImpacts(false)}
-         selectedPolicies={Object.keys(policyIntensities).map(policyId => ({
+         selectedPolicies={Object.keys(policyDefinitions).map(policyId => ({
            id: policyId,
            name: policyDefinitions[policyId]?.name || policyId,
            category: policyDefinitions[policyId]?.stakeholder || 'Unknown',
@@ -2397,11 +2398,13 @@ function App() {
            const synergyCatalog = {
              // District Administrator synergies
              'DATA_ANALYTICS+AI_INTEGRATION': {
-               label: 'Data Analytics + AI Integration',
+               label: 'Smart Classroom Intelligence',
                policies: ['DATA_ANALYTICS', 'AI_INTEGRATION'],
                metrics: ['AI_LITERACY', 'INNOVATION_INDEX', 'EMPLOYMENT_IMPACT'],
                threshold: 35,
-               description: 'Analytics turn classroom data into feedback for instruction',
+               description: 'Data Analytics Capacity + AI-Integration',
+               affectedOutcomes: 'AI Literacy, Innovation Index, Employability',
+               whyThisHappens: 'High data analytics combined with strong AI integration creates a feedback loop where student performance data continuously improves AI tool effectiveness.',
                rawImpact: { AI_LITERACY: 'large', INNOVATION_INDEX: 'medium', EMPLOYMENT_IMPACT: 'medium' }
              },
              'DATA_ANALYTICS+IMPACT_REPORTING': {
@@ -2412,12 +2415,14 @@ function App() {
                description: 'Converts insights into transparent outcomes',
                rawImpact: { COMMUNITY_TRUST: 'large', BUDGET_STRAIN: 'small' }
              },
-             'PD_FUNDS+EDUCATOR_AUTONOMY': {
-               label: 'Professional Development + Educator Autonomy',
-               policies: ['PD_FUNDS', 'EDUCATOR_AUTONOMY'],
+             'PD_FUNDS+EDUC_AUTONOMY': {
+               label: 'Empowered Teaching',
+               policies: ['PD_FUNDS', 'EDUC_AUTONOMY'],
                metrics: ['TEACHER_SATISFACTION', 'AI_LITERACY', 'INNOVATION_INDEX'],
                threshold: 35,
-               description: 'Autonomy becomes enablement with proper training',
+               description: 'Professional Development + Educator Autonomy',
+               affectedOutcomes: 'Teacher Satisfaction, AI Literacy, Innovation Index',
+               whyThisHappens: 'High professional development combined with strong educator autonomy creates teachers who are both AI-skilled and empowered to innovate, leading to breakthrough classroom practices.',
                rawImpact: { TEACHER_SATISFACTION: 'large', AI_LITERACY: 'medium', INNOVATION_INDEX: 'medium' }
              },
              'PD_FUNDS+AI_INTEGRATION': {
@@ -2587,28 +2592,36 @@ function App() {
            };
            
            // Check for active synergies
-           selectedPolicies.forEach(policy1 => {
-             selectedPolicies.forEach(policy2 => {
+           const processedSynergyPairs = new Set();
+           Object.keys(policyDefinitions).forEach(policy1 => {
+             Object.keys(policyDefinitions).forEach(policy2 => {
                if (policy1 !== policy2) {
-                 const intensity1 = policyIntensities[policy1] || 0;
-                 const intensity2 = policyIntensities[policy2] || 0;
+                 // Create a consistent pair key to avoid duplicates
+                 const pairKey = [policy1, policy2].sort().join('+');
                  
-                 if (intensity1 >= 35 && intensity2 >= 35) {
-                   const key = `${policy1}+${policy2}`;
-                   const reverseKey = `${policy2}+${policy1}`;
+                 if (!processedSynergyPairs.has(pairKey)) {
+                   processedSynergyPairs.add(pairKey);
                    
-                   if (synergyCatalog[key]) {
-                     synergies.push({
-                       ...synergyCatalog[key],
-                       policies: [policy1, policy2],
-                       active: true
-                     });
-                   } else if (synergyCatalog[reverseKey]) {
-                     synergies.push({
-                       ...synergyCatalog[reverseKey],
-                       policies: [policy1, policy2],
-                       active: true
-                     });
+                   const intensity1 = policyIntensities[policy1] || 0;
+                   const intensity2 = policyIntensities[policy2] || 0;
+                   
+                   if (intensity1 >= 35 && intensity2 >= 35) {
+                     const key = `${policy1}+${policy2}`;
+                     const reverseKey = `${policy2}+${policy1}`;
+                     
+                     if (synergyCatalog[key]) {
+                       synergies.push({
+                         ...synergyCatalog[key],
+                         policies: [policy1, policy2],
+                         active: true
+                       });
+                     } else if (synergyCatalog[reverseKey]) {
+                       synergies.push({
+                         ...synergyCatalog[reverseKey],
+                         policies: [policy1, policy2],
+                         active: true
+                       });
+                     }
                    }
                  }
                }
@@ -2638,29 +2651,24 @@ function App() {
                description: 'Competing time and funds can fragment focus',
                mitigation: 'Scope pilots carefully and stage PD to support pilot phases'
              },
-             'PROTECT_STD+EDUCATOR_AUTONOMY': {
-               label: 'Student Protection vs Educator Autonomy',
-               policies: ['PROTECT_STD', 'EDUCATOR_AUTONOMY'],
+             'PROTECT_STD+EDUC_AUTONOMY': {
+               label: 'Safety vs Freedom',
+               policies: ['PROTECT_STD', 'EDUC_AUTONOMY'],
                metrics: ['TEACHER_SATISFACTION', 'INNOVATION_INDEX'],
                severity: 'high',
-               description: 'Guardrails can feel restrictive without training',
+               description: 'Student Protection Standards + Educator Autonomy',
+               affectedOutcomes: 'Teacher Satisfaction, Innovation Index',
+               whyThisHappens: 'High student protection standards combined with strong educator autonomy creates tension between comprehensive safety requirements and teachers\' desire for flexible, creative AI tool usage.',
                mitigation: 'Provide clear rationale, quick approvals, and comprehensive PD'
              },
-             // Education Institution Leader tensions
-             'EDUCATOR_AUTONOMY+PROTECT_STD': {
-               label: 'Educator Autonomy vs Student Protection',
-               policies: ['EDUCATOR_AUTONOMY', 'PROTECT_STD'],
-               metrics: ['TEACHER_SATISFACTION', 'COMMUNITY_TRUST'],
-               severity: 'high',
-               description: 'Tool approval and data rules can constrain choices',
-               mitigation: 'Create transparent rationale and provide PD to protect satisfaction'
-             },
              'AI_INTEGRATION+MODEL_EVAL_STD': {
-               label: 'AI Integration vs Model Evaluation',
+               label: 'Speed vs Safety',
                policies: ['AI_INTEGRATION', 'MODEL_EVAL_STD'],
                metrics: ['COMMUNITY_TRUST', 'AI_VULNERABILITY_INDEX'],
                severity: 'medium',
-               description: 'Fast rollout vs evidence and monitoring',
+               description: 'AI-Integration + Model Evaluation Standards',
+               affectedOutcomes: 'Community Trust, AI Vulnerability',
+               whyThisHappens: 'High AI integration combined with strict model evaluation standards creates tension between rapid deployment demands and comprehensive safety assessment requirements.',
                mitigation: 'Sequence evaluation before integration, use staged rollouts'
              },
              // Community Leader tensions
@@ -2739,25 +2747,50 @@ function App() {
                description: 'Strict governance can constrain teacher autonomy',
                mitigation: 'Create fast-track approval processes and clear rationale for restrictions'
              },
+             'INFRA_INVEST+PD_FUNDS': {
+               label: 'Budget Battle: Infrastructure vs Training',
+               policies: ['INFRA_INVEST', 'PD_FUNDS'],
+               metrics: ['BUDGET_STRAIN'],
+               severity: 'high',
+               description: 'Technology Infrastructure + Professional Development',
+               affectedOutcomes: 'Budget Strain',
+               whyThisHappens: 'High technology infrastructure combined with extensive professional development creates competing demands on district budgets, forcing difficult trade-offs between hardware investment and staff training.',
+               mitigation: 'Phase implementation, leverage federal funding, and align PD with infrastructure rollouts'
+             },
            };
            
            // Check for active tensions
-           selectedPolicies.forEach(policy1 => {
-             selectedPolicies.forEach(policy2 => {
+           const processedPairs = new Set();
+           Object.keys(policyDefinitions).forEach(policy1 => {
+             Object.keys(policyDefinitions).forEach(policy2 => {
                if (policy1 !== policy2) {
-                 const key = `${policy1}+${policy2}`;
-                 const reverseKey = `${policy2}+${policy1}`;
+                 // Create a consistent pair key to avoid duplicates
+                 const pairKey = [policy1, policy2].sort().join('+');
                  
-                 if (tensionCatalog[key]) {
-                   tensions.push({
-                     ...tensionCatalog[key],
-                     policies: [policy1, policy2]
-                   });
-                 } else if (tensionCatalog[reverseKey]) {
-                   tensions.push({
-                     ...tensionCatalog[reverseKey],
-                     policies: [policy1, policy2]
-                   });
+                 if (!processedPairs.has(pairKey)) {
+                   processedPairs.add(pairKey);
+                   
+                   const intensity1 = policyIntensities[policy1] || 0;
+                   const intensity2 = policyIntensities[policy2] || 0;
+                   
+                   if (intensity1 >= 35 && intensity2 >= 35) {
+                     const key = `${policy1}+${policy2}`;
+                     const reverseKey = `${policy2}+${policy1}`;
+                     
+                     if (tensionCatalog[key]) {
+                       tensions.push({
+                         ...tensionCatalog[key],
+                         policies: [policy1, policy2],
+                         active: true
+                       });
+                     } else if (tensionCatalog[reverseKey]) {
+                       tensions.push({
+                         ...tensionCatalog[reverseKey],
+                         policies: [policy1, policy2],
+                         active: true
+                       });
+                     }
+                   }
                  }
                }
              });
