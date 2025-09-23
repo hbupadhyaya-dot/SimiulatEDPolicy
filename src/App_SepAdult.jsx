@@ -8,6 +8,8 @@ import HeaderScenarioSelect from './components/HeaderScenarioSelect'
 
 // Time Series Chart Component
 function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities, scenarioBaseline }) {
+  const [displayData, setDisplayData] = useState(null)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [animationKey, setAnimationKey] = useState(0)
   
   const metricColors = {
@@ -21,7 +23,7 @@ function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities, scena
     AI_VULNERABILITY_INDEX: '#EC4899' // Pink
   }
 
-  const data = useMemo(() => {
+  const newData = useMemo(() => {
     try {
       const years = Array.from({ length: 16 }, (_, i) => 2025 + i)
       const combinedData = years.map(year => ({ year }))
@@ -40,23 +42,68 @@ function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities, scena
     }
   }, [metricIds, selectedPolicies, policyIntensities, scenarioBaseline])
 
-  // Trigger animation when scenario baseline changes
+  // Handle smooth data transitions
   useEffect(() => {
-    setAnimationKey(prev => prev + 1)
-  }, [scenarioBaseline])
+    if (displayData === null) {
+      // Initial load
+      setDisplayData(newData)
+    } else if (JSON.stringify(displayData) !== JSON.stringify(newData)) {
+      // Data has changed, trigger smooth transition
+      setIsTransitioning(true)
+      setAnimationKey(prev => prev + 1)
+      
+      // Use requestAnimationFrame for smooth transition
+      const startTime = performance.now()
+      const duration = 600 // 600ms transition
+      
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        
+        // Ease-out function for smooth animation
+        const easeOut = 1 - Math.pow(1 - progress, 3)
+        
+        // Interpolate between old and new data
+        const interpolatedData = displayData.map((oldPoint, index) => {
+          const newPoint = newData[index]
+          const interpolatedPoint = { year: oldPoint.year }
+          
+          metricIds.forEach(metricId => {
+            const oldValue = oldPoint[metricId] || 0
+            const newValue = newPoint[metricId] || 0
+            interpolatedPoint[metricId] = oldValue + (newValue - oldValue) * easeOut
+          })
+          
+          return interpolatedPoint
+        })
+        
+        setDisplayData(interpolatedData)
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          setIsTransitioning(false)
+        }
+      }
+      
+      requestAnimationFrame(animate)
+    }
+  }, [newData, displayData, metricIds])
+
+  if (!displayData) return null
 
   return (
     <div 
-      key={animationKey}
       style={{ 
         width: '100%', 
-        height: '100%', 
-        transition: 'all 0.8s ease-in-out'
+        height: '100%',
+        opacity: isTransitioning ? 0.9 : 1,
+        transition: 'opacity 0.2s ease-in-out'
       }}
     >
       <ResponsiveContainer>
         <LineChart 
-          data={data} 
+          data={displayData} 
           margin={{ top: 10, right: 25, left: 10, bottom: 15 }}
         >
           <XAxis dataKey="year" type="number" domain={['dataMin', 'dataMax']} ticks={[2025, 2028, 2031, 2034, 2037, 2040]} tick={{ fontSize: 11 }} />
@@ -77,10 +124,7 @@ function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities, scena
               strokeWidth={4}
               name={outcomeMetrics[metricId]?.name || metricId}
               dot={false}
-              isAnimationActive={true}
-              animationBegin={0}
-              animationDuration={1200}
-              animationEasing="ease-in-out"
+              isAnimationActive={false}
             />
           ))}
         </LineChart>
