@@ -252,25 +252,32 @@ const coefficients = {
     INNOVATION_INDEX: 0.4,
     TEACHER_SATISFACTION: 0.4,
     DIGITAL_EQUITY: 0.4,
-    BUDGET_STRAIN: 0.25, // Updated to 0.25
+    BUDGET_STRAIN: 0.4, // Updated to match PD_FUNDS cost level
     EMPLOYMENT_IMPACT: 0.5,
     AI_VULNERABILITY_INDEX: -0.2
   }
 };
 
-// Max delta per tick for realistic bounds
+// Max delta per tick for more realistic and gradual bounds
 const MAX_DELTA = {
-  AI_LITERACY: 8,
-  TEACHER_SATISFACTION: 6,
-  COMMUNITY_TRUST: 6,
-  DIGITAL_EQUITY: 6,
-  INNOVATION_INDEX: 7,
-  AI_VULNERABILITY_INDEX: 10, // Can decrease more rapidly
-  BUDGET_STRAIN: 10, // Can increase up to 10, decrease up to 6
-  EMPLOYMENT_IMPACT: 7
+  AI_LITERACY: 5,
+  TEACHER_SATISFACTION: 4,
+  COMMUNITY_TRUST: 4,
+  DIGITAL_EQUITY: 4,
+  INNOVATION_INDEX: 4,
+  AI_VULNERABILITY_INDEX: 6, // Can decrease more rapidly
+  BUDGET_STRAIN: 10, // Can increase up to 10, decrease up to 6 (more challenging)
+  EMPLOYMENT_IMPACT: 4
 };
 
-// Policy category intensity curve parameters
+// Implementation thresholds - more challenging progression
+const IMPLEMENTATION_THRESHOLDS = {
+  LOW: { min: 0, max: 39, impactMin: 0.05, impactMax: 0.25 },
+  MODERATE: { min: 40, max: 74, impactMin: 0.25, impactMax: 0.6 },
+  HIGH: { min: 75, max: 100, impactMin: 0.6, impactMax: 1.0 }
+};
+
+// Policy category intensity curve parameters (kept for compatibility)
 const INTENSITY_PARAMS = {
   // Governance policies (more cautious)
   governance: { k: 1.2, center: 50 },
@@ -302,6 +309,7 @@ const POLICY_CATEGORIES = {
 // Cost-intensive policies for budget-mediated throttling
 const COST_INTENSIVE_POLICIES = {
   INFRA_INVEST: 0.4,     // High cost intensity
+  AI_INTEGRATION: 0.4,   // High cost intensity (same as PD_FUNDS)
   PD_FUNDS: 0.3,         // Medium-high cost
   ACCESS_STD: 0.2,       // Medium cost
   DATA_ANALYTICS: 0.2,   // Medium cost
@@ -354,26 +362,13 @@ export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
 
   // Calculate direct impacts with realistic constraints
   selectedPolicies.forEach(policyId => {
-    const baselineIntensities = {
-      DATA_ANALYTICS: 0,
-      PROTECT_STD: 0,
-      PD_FUNDS: 0,
-      EDUC_AUTONOMY: 0,
-      AI_INTEGRATION: 0,
-      DIGITAL_CITIZEN: 0,
-      COMM_INPUT: 0,
-      IMPACT_REP_STD: 0,
-      LOCAL_JOB_ALIGN: 0,
-      INTEROP_STD: 0,
-      INFRA_INVEST: 0,
-      ACCESS_STD: 0,
-      STATE_FED_PART: 0,
-      INNOV_SANDBOX: 0,
-      MODEL_EVAL_STD: 0
-    };
+    const intensity = policyIntensities[policyId] || 0;
     
-    const center = baselineIntensities[policyId] || 0;
-    const intensity = (policyIntensities[policyId] !== undefined) ? policyIntensities[policyId] : center;
+    // Skip policies with 0% intensity - they have no impact
+    if (intensity === 0) {
+      return;
+    }
+    
     const policyCoefficients = coefficients[policyId] || {};
     
     // Get policy effectiveness based on prerequisites
@@ -383,13 +378,41 @@ export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
     const category = POLICY_CATEGORIES[policyId] || 'culture';
     const params = INTENSITY_PARAMS[category];
     
-    // Smooth S-curve intensity mapping: tanh(k*(intensity-center)/50)
-    const intensityFactor = Math.tanh(params.k * (intensity - params.center) / 50);
+    // Implementation thresholds:
+    // Low: 0% - 39% (minimal impact)
+    // Moderate: 40% - 74% (moderate impact) 
+    // High: 75% - 100% (full impact)
+    
+    let scaledIntensityFactor;
+    
+    if (intensity >= IMPLEMENTATION_THRESHOLDS.LOW.min && intensity <= IMPLEMENTATION_THRESHOLDS.LOW.max) {
+      // Low implementation: minimal impact
+      const range = IMPLEMENTATION_THRESHOLDS.LOW.max - IMPLEMENTATION_THRESHOLDS.LOW.min;
+      const progress = (intensity - IMPLEMENTATION_THRESHOLDS.LOW.min) / range;
+      scaledIntensityFactor = IMPLEMENTATION_THRESHOLDS.LOW.impactMin + 
+        progress * (IMPLEMENTATION_THRESHOLDS.LOW.impactMax - IMPLEMENTATION_THRESHOLDS.LOW.impactMin);
+    } else if (intensity >= IMPLEMENTATION_THRESHOLDS.MODERATE.min && intensity <= IMPLEMENTATION_THRESHOLDS.MODERATE.max) {
+      // Moderate implementation: moderate impact
+      const range = IMPLEMENTATION_THRESHOLDS.MODERATE.max - IMPLEMENTATION_THRESHOLDS.MODERATE.min;
+      const progress = (intensity - IMPLEMENTATION_THRESHOLDS.MODERATE.min) / range;
+      scaledIntensityFactor = IMPLEMENTATION_THRESHOLDS.MODERATE.impactMin + 
+        progress * (IMPLEMENTATION_THRESHOLDS.MODERATE.impactMax - IMPLEMENTATION_THRESHOLDS.MODERATE.impactMin);
+    } else if (intensity >= IMPLEMENTATION_THRESHOLDS.HIGH.min && intensity <= IMPLEMENTATION_THRESHOLDS.HIGH.max) {
+      // High implementation: full impact
+      const range = IMPLEMENTATION_THRESHOLDS.HIGH.max - IMPLEMENTATION_THRESHOLDS.HIGH.min;
+      const progress = (intensity - IMPLEMENTATION_THRESHOLDS.HIGH.min) / range;
+      scaledIntensityFactor = IMPLEMENTATION_THRESHOLDS.HIGH.impactMin + 
+        progress * (IMPLEMENTATION_THRESHOLDS.HIGH.impactMax - IMPLEMENTATION_THRESHOLDS.HIGH.impactMin);
+    } else {
+      // Fallback for edge cases
+      scaledIntensityFactor = 0;
+    }
     
     Object.keys(metrics).forEach(metric => {
       if (policyCoefficients[metric]) {
-        // Balanced impact scaling for achievable but realistic outcomes
-        let baseImpact = policyCoefficients[metric] * intensityFactor * effectiveness * 15;
+        // Balanced impact scaling for realistic and challenging outcomes
+        // Base multiplier set to 11x for strategic decision-making
+        let baseImpact = policyCoefficients[metric] * scaledIntensityFactor * effectiveness * 11;
         
         // Apply trust-mediated adoption for AI-related policies
         if (TRUST_MEDIATED_POLICIES.includes(policyId)) {
@@ -403,21 +426,21 @@ export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
           baseImpact *= budgetMultiplier;
         }
         
-        // Tightened diminishing returns starting near 60
+        // More aggressive diminishing returns starting at 50 for realistic progression
         let diminishingFactor = 1.0;
         const currentValue = metrics[metric];
         
         if (metric === 'BUDGET_STRAIN') {
           // Budget strain increases more gradually
-          if (currentValue > 60) {
-            const excess = currentValue - 60;
-            diminishingFactor = Math.max(0.2, 1.0 - (excess / 25) * 0.8);
+          if (currentValue > 50) {
+            const excess = currentValue - 50;
+            diminishingFactor = Math.max(0.1, 1.0 - (excess / 30) * 0.9);
           }
         } else {
-          // Other positive metrics have stronger diminishing returns starting at 60
-          if (currentValue > 60) {
-            const excess = currentValue - 60;
-            diminishingFactor = Math.max(0.1, 1.0 - (excess / 25) * 0.9);
+          // Other positive metrics have stronger diminishing returns starting at 50
+          if (currentValue > 50) {
+            const excess = currentValue - 50;
+            diminishingFactor = Math.max(0.05, 1.0 - (excess / 30) * 0.95);
           }
         }
         
@@ -439,7 +462,7 @@ export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
   });
 
   // Budget strain increases gradually with multiple high-investment policies
-  const highCostPolicies = ['PD_FUNDS', 'INFRA_INVEST', 'INNOV_SANDBOX', 'DATA_ANALYTICS'];
+  const highCostPolicies = ['PD_FUNDS', 'INFRA_INVEST', 'AI_INTEGRATION', 'INNOV_SANDBOX', 'DATA_ANALYTICS'];
   const activeCostlyPolicies = highCostPolicies.filter(policy => 
     selectedPolicies.includes(policy) && (policyIntensities[policy] || 0) > 75
   );
@@ -899,6 +922,19 @@ export const shockScenarios = {
     }
   }
 };
+
+// Get implementation level for a given intensity
+export function getImplementationLevel(intensity) {
+  if (intensity >= IMPLEMENTATION_THRESHOLDS.HIGH.min) {
+    return 'High';
+  } else if (intensity >= IMPLEMENTATION_THRESHOLDS.MODERATE.min) {
+    return 'Moderate';
+  } else if (intensity >= IMPLEMENTATION_THRESHOLDS.LOW.min) {
+    return 'Low';
+  } else {
+    return 'None';
+  }
+}
 
 // Get calculation breakdown for transparency
 export function getCalculationBreakdown(selectedPolicies, policyIntensities) {
