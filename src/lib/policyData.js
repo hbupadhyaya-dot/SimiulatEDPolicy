@@ -120,7 +120,7 @@ export const coefficients = {
     AI_LITERACY: 0.4,
     COMMUNITY_TRUST: 0.2,
     INNOVATION_INDEX: 0.25,
-    TEACHER_SATISFACTION: 0.1,
+    TEACHER_SATISFACTION: 0.5,
     DIGITAL_EQUITY: 0.2,
     BUDGET_STRAIN: 0.4, // Updated to 0.4
     EMPLOYMENT_IMPACT: 0.15,
@@ -140,7 +140,7 @@ export const coefficients = {
     AI_LITERACY: 0.15,
     COMMUNITY_TRUST: 0.2,
     INNOVATION_INDEX: 0.3,
-    TEACHER_SATISFACTION: 0.4, // Reduced - needs training to be fully effective
+    TEACHER_SATISFACTION: 0.5,
     DIGITAL_EQUITY: 0.15,
     BUDGET_STRAIN: 0.05, // Low cost policy
     EMPLOYMENT_IMPACT: 0.1,
