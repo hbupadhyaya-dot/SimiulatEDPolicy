@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
 import { policyDefinitions, outcomeMetrics, calculateCurrentMetrics, generateTimeSeriesData, calculatePolicySynergy, getPolicyCoefficients } from './lib/policyData'
+import { ScenarioProvider, useScenarioStore } from './contexts/ScenarioContext'
+import HeaderScenarioSelect from './components/HeaderScenarioSelect'
+import OutcomesPanel from './components/OutcomesPanel'
 
 // Time Series Chart Component
 function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities }) {
@@ -850,7 +853,8 @@ const StartScreenModal = ({ isOpen, onClose }) => {
   )
 }
 
-function App() {
+function AppContent() {
+  const { state: scenarioState } = useScenarioStore()
   const [selectedPolicies, setSelectedPolicies] = useState([])
   const [policyIntensities, setPolicyIntensities] = useState({
     DATA_ANALYTICS: 0,
@@ -889,13 +893,12 @@ function App() {
   const [impactExplanationModal, setImpactExplanationModal] = useState(false)
   const [showStartScreen, setShowStartScreen] = useState(false)
   const [currentMetrics, setCurrentMetrics] = useState(DEFAULT_METRICS)
-  const [selectedScenario, setSelectedScenario] = useState('NORMAL')
 
   const tabs = [
     { id: 'main', name: 'Main Dashboard' }
   ]
 
-  // Update metrics when policies, intensities, or scenario changes - SAFE VERSION
+  // Update metrics when policies or intensities change
   useEffect(() => {
     // Only run if there are actual policy changes
     if (selectedPolicies.length === 0) {
@@ -904,68 +907,12 @@ function App() {
     
     try {
       const metrics = calculateCurrentMetrics(selectedPolicies, policyIntensities);
-      
-      // Apply scenario adjustments to the calculated metrics
-      let adjustedMetrics = { ...metrics }
-      
-      if (selectedScenario !== 'NORMAL') {
-        // Get scenario baseline
-        let scenarioBaseline
-        switch (selectedScenario) {
-          case 'TOOL_BIAS':
-            scenarioBaseline = {
-              AI_LITERACY: 45,
-              COMMUNITY_TRUST: 35,
-              INNOVATION_INDEX: 40,
-              TEACHER_SATISFACTION: 45,
-              DIGITAL_EQUITY: 30,
-              BUDGET_STRAIN: 60,
-              EMPLOYMENT_IMPACT: 45,
-              AI_VULNERABILITY_INDEX: 65
-            }
-            break
-          case 'FUNDING_CUT':
-            scenarioBaseline = {
-              AI_LITERACY: 40,
-              COMMUNITY_TRUST: 45,
-              INNOVATION_INDEX: 35,
-              TEACHER_SATISFACTION: 35,
-              DIGITAL_EQUITY: 35,
-              BUDGET_STRAIN: 80,
-              EMPLOYMENT_IMPACT: 40,
-              AI_VULNERABILITY_INDEX: 60
-            }
-            break
-          case 'DATA_BREACH':
-            scenarioBaseline = {
-              AI_LITERACY: 50,
-              COMMUNITY_TRUST: 25,
-              INNOVATION_INDEX: 30,
-              TEACHER_SATISFACTION: 40,
-              DIGITAL_EQUITY: 45,
-              BUDGET_STRAIN: 70,
-              EMPLOYMENT_IMPACT: 50,
-              AI_VULNERABILITY_INDEX: 85
-            }
-            break
-          default:
-            scenarioBaseline = DEFAULT_METRICS
-        }
-        
-        // Calculate the difference from normal baseline and apply to current metrics
-        Object.keys(adjustedMetrics).forEach(metric => {
-          const normalBaseline = DEFAULT_METRICS[metric] || 50
-          const scenarioOffset = scenarioBaseline[metric] - normalBaseline
-          adjustedMetrics[metric] = Math.max(0, Math.min(100, metrics[metric] + scenarioOffset))
-        })
-      }
-      
-      setCurrentMetrics(adjustedMetrics);
+      setCurrentMetrics(metrics);
     } catch (error) {
       console.error('Error calculating metrics:', error);
       setCurrentMetrics(DEFAULT_METRICS);
     }
-  }, [selectedPolicies, policyIntensities, selectedScenario]);
+  }, [selectedPolicies, policyIntensities]);
 
   // Handle policy intensity changes
   const handlePolicyIntensityChange = (policyId, newValue) => {
@@ -1107,61 +1054,6 @@ function App() {
     console.log('Reset completed - all states set to their respective starting points and metrics reset to baseline')
   }
 
-  // Handle scenario changes
-  const handleScenarioChange = (scenario) => {
-    setSelectedScenario(scenario)
-    
-    // Define scenario-specific baseline metrics
-    let scenarioMetrics
-    switch (scenario) {
-      case 'NORMAL':
-        scenarioMetrics = DEFAULT_METRICS
-        break
-      case 'TOOL_BIAS':
-        scenarioMetrics = {
-          AI_LITERACY: 45,           // Reduced due to bias concerns
-          COMMUNITY_TRUST: 35,       // Significantly reduced trust
-          INNOVATION_INDEX: 40,      // Innovation slowed by bias issues
-          TEACHER_SATISFACTION: 45,  // Teachers concerned about bias
-          DIGITAL_EQUITY: 30,        // Bias disproportionately affects some groups
-          BUDGET_STRAIN: 60,         // Increased costs for bias mitigation
-          EMPLOYMENT_IMPACT: 45,     // Bias affects career preparation
-          AI_VULNERABILITY_INDEX: 65 // Increased vulnerability due to bias
-        }
-        break
-      case 'FUNDING_CUT':
-        scenarioMetrics = {
-          AI_LITERACY: 40,           // Reduced training and resources
-          COMMUNITY_TRUST: 45,       // Community concerned about cuts
-          INNOVATION_INDEX: 35,      // Innovation limited by funding
-          TEACHER_SATISFACTION: 35,  // Teachers frustrated by cuts
-          DIGITAL_EQUITY: 35,        // Cuts disproportionately affect some schools
-          BUDGET_STRAIN: 80,         // High strain due to cuts
-          EMPLOYMENT_IMPACT: 40,     // Reduced career preparation resources
-          AI_VULNERABILITY_INDEX: 60 // Less funding for security
-        }
-        break
-      case 'DATA_BREACH':
-        scenarioMetrics = {
-          AI_LITERACY: 50,           // Unchanged
-          COMMUNITY_TRUST: 25,       // Severely reduced trust
-          INNOVATION_INDEX: 30,      // Innovation halted by security concerns
-          TEACHER_SATISFACTION: 40,  // Teachers concerned about data safety
-          DIGITAL_EQUITY: 45,        // Slightly affected
-          BUDGET_STRAIN: 70,         // Increased costs for security
-          EMPLOYMENT_IMPACT: 50,     // Unchanged
-          AI_VULNERABILITY_INDEX: 85 // Very high vulnerability
-        }
-        break
-      default:
-        scenarioMetrics = DEFAULT_METRICS
-    }
-    
-    // Update current metrics with scenario baseline
-    setCurrentMetrics(scenarioMetrics)
-    
-    console.log(`Scenario changed to ${scenario} - metrics updated to reflect new baseline`)
-  }
 
   // Helper function to get policy description
   const getPolicyDescription = (policyId) => {
@@ -1290,24 +1182,8 @@ function App() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              {/* Scenarios Dropdown */}
-              <div className="relative">
-                <select
-                  value={selectedScenario}
-                  onChange={(e) => handleScenarioChange(e.target.value)}
-                  className="px-3 py-2 border border-slate-200 rounded text-sm cursor-pointer focus:ring-1 focus:ring-slate-400 focus:border-slate-400 bg-white/90 backdrop-blur-sm hover:bg-slate-50 transition-colors appearance-none pr-8"
-                >
-                  <option value="NORMAL">Normal Conditions</option>
-                  <option value="TOOL_BIAS">Tool Bias Discovery</option>
-                  <option value="FUNDING_CUT">Funding Cut</option>
-                  <option value="DATA_BREACH">Data Breach</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
+              {/* Scenario Selector */}
+              <HeaderScenarioSelect />
               
               <button
                 onClick={() => setShowStartScreen(true)}
@@ -1337,6 +1213,11 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 py-3 h-[calc(100vh-120px)]">
           <div className="flex-1 overflow-hidden">
             <div className="h-full p-2 space-y-1">
+                {/* Outcomes Panel */}
+                <div className="mb-4">
+                  <OutcomesPanel />
+                </div>
+                
                 {/* Top Section - Charts */}
                 <div className="grid grid-cols-12 gap-4 h-[48%]">
                   {/* Time Series Chart */}
@@ -1987,7 +1868,6 @@ function App() {
                   </div>
                 </div>
               </div>
-            )}
             
             {/* Modals */}
             <div>
@@ -2026,10 +1906,20 @@ function App() {
                 />
               </div>
             </div>
+          </div>
         </div>
       </div>
     </div>
   )
+}
+
+// Main App component with ScenarioProvider
+function App() {
+  return (
+    <ScenarioProvider>
+      <AppContent />
+    </ScenarioProvider>
+  );
 }
 
 export default App

@@ -105,7 +105,7 @@ export const outcomeMetrics = {
 };
 
 // Impact coefficients for each policy on each outcome metric (simplified)
-const coefficients = {
+export const coefficients = {
   PROTECT_STD: {
     AI_LITERACY: 0.2,
     COMMUNITY_TRUST: 0.3,
@@ -118,13 +118,13 @@ const coefficients = {
   },
   PD_FUNDS: {
     AI_LITERACY: 0.4,
-    COMMUNITY_TRUST: 0.15,
+    COMMUNITY_TRUST: 0.2,
     INNOVATION_INDEX: 0.25,
-    TEACHER_SATISFACTION: 0.8, // Strong primary driver of teacher satisfaction
-    DIGITAL_EQUITY: 0.3,
+    TEACHER_SATISFACTION: 0.1,
+    DIGITAL_EQUITY: 0.2,
     BUDGET_STRAIN: 0.4, // Updated to 0.4
     EMPLOYMENT_IMPACT: 0.15,
-    AI_VULNERABILITY_INDEX: -0.25
+    AI_VULNERABILITY_INDEX: -0.1
   },
   INFRA_INVEST: {
     AI_LITERACY: 0.3,
@@ -144,14 +144,14 @@ const coefficients = {
     DIGITAL_EQUITY: 0.15,
     BUDGET_STRAIN: 0.05, // Low cost policy
     EMPLOYMENT_IMPACT: 0.1,
-    AI_VULNERABILITY_INDEX: 0.1
+    AI_VULNERABILITY_INDEX: 0.2
   },
   DIGITAL_CITIZEN: {
     AI_LITERACY: 0.5,
     COMMUNITY_TRUST: 0.4,
     INNOVATION_INDEX: 0.2,
     TEACHER_SATISFACTION: 0.1,
-    DIGITAL_EQUITY: 0.5,
+    DIGITAL_EQUITY: 0.3,
     BUDGET_STRAIN: 0.1,
     EMPLOYMENT_IMPACT: 0.3,
     AI_VULNERABILITY_INDEX: -0.3
@@ -160,7 +160,7 @@ const coefficients = {
     AI_LITERACY: 0.2,
     COMMUNITY_TRUST: 0.2,
     INNOVATION_INDEX: 0.1,
-    TEACHER_SATISFACTION: 0.1,
+    TEACHER_SATISFACTION: 0.2,
     DIGITAL_EQUITY: 0.5,
     BUDGET_STRAIN: 0.2,
     EMPLOYMENT_IMPACT: 0.1,
@@ -169,12 +169,12 @@ const coefficients = {
   INNOV_SANDBOX: {
     AI_LITERACY: 0.3,
     COMMUNITY_TRUST: 0.1,
-    INNOVATION_INDEX: 0.6,
+    INNOVATION_INDEX: 0.5,
     TEACHER_SATISFACTION: 0.3,
     DIGITAL_EQUITY: 0.3,
     BUDGET_STRAIN: 0.3, // Updated to 0.3
     EMPLOYMENT_IMPACT: 0.4,
-    AI_VULNERABILITY_INDEX: -0.4
+    AI_VULNERABILITY_INDEX: -0.3
   },
   MODEL_EVAL_STD: {
     AI_LITERACY: 0.1,
@@ -190,11 +190,11 @@ const coefficients = {
     AI_LITERACY: 0.1,
     COMMUNITY_TRUST: 0.2,
     INNOVATION_INDEX: 0.3,
-    TEACHER_SATISFACTION: 0.4,
-    DIGITAL_EQUITY: 0.3,
+    TEACHER_SATISFACTION: 0.3,
+    DIGITAL_EQUITY: 0.2,
     BUDGET_STRAIN: 0.1,
     EMPLOYMENT_IMPACT: 0.2,
-    AI_VULNERABILITY_INDEX: -0.5
+    AI_VULNERABILITY_INDEX: -0.3
   },
   COMM_INPUT: {
     AI_LITERACY: 0.1,
@@ -214,14 +214,14 @@ const coefficients = {
     DIGITAL_EQUITY: 0.3,
     BUDGET_STRAIN: 0.1,
     EMPLOYMENT_IMPACT: 0.1,
-    AI_VULNERABILITY_INDEX: -0.3
+    AI_VULNERABILITY_INDEX: -0.2
   },
   LOCAL_JOB_ALIGN: {
     AI_LITERACY: 0.3,
     COMMUNITY_TRUST: 0.3,
     INNOVATION_INDEX: 0.2,
     TEACHER_SATISFACTION: 0.2,
-    DIGITAL_EQUITY: 0.2,
+    DIGITAL_EQUITY: 0.1,
     BUDGET_STRAIN: 0.0,
     EMPLOYMENT_IMPACT: 0.5,
     AI_VULNERABILITY_INDEX: 0.0
@@ -237,24 +237,24 @@ const coefficients = {
     AI_VULNERABILITY_INDEX: -0.2
   },
   DATA_ANALYTICS: {
-    AI_LITERACY: 0.4,
+    AI_LITERACY: 0.3,
     COMMUNITY_TRUST: 0.2,
-    INNOVATION_INDEX: 0.5,
+    INNOVATION_INDEX: 0.4,
     TEACHER_SATISFACTION: 0.3,
     DIGITAL_EQUITY: 0.3,
     BUDGET_STRAIN: 0.2, // Kept at 0.2 as requested
-    EMPLOYMENT_IMPACT: 0.4,
+    EMPLOYMENT_IMPACT: 0.2,
     AI_VULNERABILITY_INDEX: -0.1
   },
   AI_INTEGRATION: {
-    AI_LITERACY: 0.6,
-    COMMUNITY_TRUST: 0.3,
+    AI_LITERACY: 0.5,
+    COMMUNITY_TRUST: 0.2,
     INNOVATION_INDEX: 0.4,
     TEACHER_SATISFACTION: 0.4,
-    DIGITAL_EQUITY: 0.4,
+    DIGITAL_EQUITY: 0.3,
     BUDGET_STRAIN: 0.4, // Updated to match PD_FUNDS cost level
     EMPLOYMENT_IMPACT: 0.5,
-    AI_VULNERABILITY_INDEX: -0.2
+    AI_VULNERABILITY_INDEX: 0.2
   }
 };
 
@@ -337,8 +337,8 @@ const getBudgetMultiplier = (budgetStrain, policyId) => {
 };
 
 // Calculate current metrics based on selected policies and their intensities
-export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
-  const metrics = {
+export function calculateCurrentMetrics(selectedPolicies, policyIntensities, baselineMetrics = null) {
+  const defaultBaseline = {
     AI_LITERACY: 50,
     COMMUNITY_TRUST: 50,
     INNOVATION_INDEX: 50,
@@ -348,6 +348,8 @@ export function calculateCurrentMetrics(selectedPolicies, policyIntensities) {
     EMPLOYMENT_IMPACT: 50,
     AI_VULNERABILITY_INDEX: 50
   };
+  
+  const metrics = baselineMetrics ? { ...baselineMetrics } : { ...defaultBaseline };
 
   // Helper function to check if prerequisite policies are adequately implemented
   const hasPrerequisite = (requiredPolicy, minIntensity = 30) => {
@@ -773,7 +775,7 @@ export function calculatePolicySynergy(policy1, policy2, intensity1, intensity2)
 }
 
 // Generate time series data for charts with metric-specific realistic curves
-export function generateTimeSeriesData(metricId, selectedPolicies, policyIntensities, shockScenario = 'NONE') {
+export function generateTimeSeriesData(metricId, selectedPolicies, policyIntensities, shockScenario = 'NONE', scenarioBaseline = null) {
   const data = [];
   
   // Define metric-specific curve characteristics
@@ -814,7 +816,7 @@ export function generateTimeSeriesData(metricId, selectedPolicies, policyIntensi
   
   for (let year = 2025; year <= 2040; year++) {
     const yearsSinceStart = year - 2025;
-    const currentMetrics = calculateCurrentMetrics(selectedPolicies, policyIntensities);
+    const currentMetrics = calculateCurrentMetrics(selectedPolicies, policyIntensities, scenarioBaseline);
     const targetValue = currentMetrics[metricId] || 50;
     
     // Calculate progress based on curve type

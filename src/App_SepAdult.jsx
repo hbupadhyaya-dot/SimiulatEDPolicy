@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts'
-import { policyDefinitions, outcomeMetrics, calculateCurrentMetrics, generateTimeSeriesData, getCalculationBreakdown, getAssumptionsPanel } from './lib/policyData'
+import { policyDefinitions, outcomeMetrics, calculateCurrentMetrics, generateTimeSeriesData, getCalculationBreakdown, getAssumptionsPanel, coefficients } from './lib/policyData'
 import { ExploreImpactsButton } from './components/ExploreImpactsButton'
 import { ExploreImpactsModal } from './components/ExploreImpactsModal'
+import { ScenarioProvider, useScenarioStore } from './contexts/ScenarioContext'
+import HeaderScenarioSelect from './components/HeaderScenarioSelect'
 
 // Time Series Chart Component
-function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities }) {
+function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities, scenarioBaseline }) {
+  const [animationKey, setAnimationKey] = useState(0)
+  
   const metricColors = {
     AI_LITERACY: '#3B82F6',        // Blue
     COMMUNITY_TRUST: '#10B981',    // Green
@@ -23,7 +27,7 @@ function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities }) {
       const combinedData = years.map(year => ({ year }))
       
       metricIds.forEach(metricId => {
-        const metricData = generateTimeSeriesData(metricId, selectedPolicies, policyIntensities)
+        const metricData = generateTimeSeriesData(metricId, selectedPolicies, policyIntensities, 'NONE', scenarioBaseline)
         metricData.forEach((dataPoint, index) => {
           combinedData[index][metricId] = dataPoint.current
         })
@@ -34,12 +38,27 @@ function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities }) {
       console.error('Error generating time series data:', error)
       return []
     }
-  }, [metricIds, selectedPolicies, policyIntensities])
+  }, [metricIds, selectedPolicies, policyIntensities, scenarioBaseline])
+
+  // Trigger animation when scenario baseline changes
+  useEffect(() => {
+    setAnimationKey(prev => prev + 1)
+  }, [scenarioBaseline])
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div 
+      key={animationKey}
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        transition: 'all 0.8s ease-in-out'
+      }}
+    >
       <ResponsiveContainer>
-        <LineChart data={data} margin={{ top: 10, right: 25, left: 10, bottom: 15 }}>
+        <LineChart 
+          data={data} 
+          margin={{ top: 10, right: 25, left: 10, bottom: 15 }}
+        >
           <XAxis dataKey="year" type="number" domain={['dataMin', 'dataMax']} ticks={[2025, 2028, 2031, 2034, 2037, 2040]} tick={{ fontSize: 11 }} />
           <YAxis domain={[0, 100]} interval={0} ticks={[0, 20, 40, 60, 80, 100]} tick={{ fontSize: 11 }} />
           <Tooltip 
@@ -51,13 +70,17 @@ function TimeSeriesChart({ metricIds, selectedPolicies, policyIntensities }) {
           />
           {metricIds.map(metricId => (
             <Line 
-              key={metricId}
+              key={`${metricId}-${animationKey}`}
               type="monotone" 
               dataKey={metricId} 
               stroke={metricColors[metricId]} 
               strokeWidth={4}
               name={outcomeMetrics[metricId]?.name || metricId}
               dot={false}
+              isAnimationActive={true}
+              animationBegin={0}
+              animationDuration={1200}
+              animationEasing="ease-in-out"
             />
           ))}
         </LineChart>
@@ -849,7 +872,8 @@ const FAQModal = ({ isOpen, onClose }) => {
     scenarios: false,
     examples: false,
     limits: false,
-    glossary: false
+    glossary: false,
+    coefficients: false
   })
 
   const toggleSection = (sectionKey) => {
@@ -857,6 +881,18 @@ const FAQModal = ({ isOpen, onClose }) => {
       ...prev,
       [sectionKey]: !prev[sectionKey]
     }))
+    
+    // Auto-scroll to the section after a brief delay to allow it to expand
+    setTimeout(() => {
+      const sectionElement = document.getElementById(`faq-section-${sectionKey}`)
+      if (sectionElement) {
+        sectionElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        })
+      }
+    }, 100)
   }
 
   if (!isOpen) return null
@@ -921,12 +957,15 @@ const FAQModal = ({ isOpen, onClose }) => {
                 <button onClick={() => toggleSection('glossary')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
                   📚 Glossary
                 </button>
+                <button onClick={() => toggleSection('coefficients')} className="text-left p-2 rounded-lg hover:bg-white transition-colors text-slate-700 hover:text-blue-600">
+                  📊 Policy Coefficients
+                </button>
               </div>
             </div>
 
             <div className="space-y-4">
               {/* Purpose and Scope */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-purpose" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('purpose')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-all duration-200"
@@ -970,7 +1009,7 @@ const FAQModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Metrics Overview */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-metrics" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('metrics')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 transition-all duration-200"
@@ -1063,7 +1102,7 @@ const FAQModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* How Calculations Work */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-calculations" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('calculations')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-slate-50 to-gray-50 hover:from-slate-100 hover:to-gray-100 transition-all duration-200"
@@ -1118,7 +1157,7 @@ const FAQModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Scenario Effects */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-scenarios" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('scenarios')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 transition-all duration-200"
@@ -1161,7 +1200,7 @@ const FAQModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Practical Examples */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-examples" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('examples')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-all duration-200"
@@ -1208,7 +1247,7 @@ const FAQModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Limits and Responsible Use */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-limits" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('limits')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-red-50 to-pink-50 hover:from-red-100 hover:to-pink-100 transition-all duration-200"
@@ -1245,7 +1284,7 @@ const FAQModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Glossary */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+              <div id="faq-section-glossary" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   onClick={() => toggleSection('glossary')}
                   className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100 transition-all duration-200"
@@ -1300,6 +1339,156 @@ const FAQModal = ({ isOpen, onClose }) => {
                   </div>
                 )}
               </div>
+
+              {/* Policy Coefficients */}
+              <div id="faq-section-coefficients" className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  onClick={() => toggleSection('coefficients')}
+                  className="w-full px-6 py-4 text-left flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 transition-all duration-200"
+                >
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-3">📊</span>
+                    <h2 className="text-xl font-semibold text-slate-800">Policy Coefficients</h2>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 text-slate-600 transform transition-transform duration-200 ${openSections.coefficients ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openSections.coefficients && (
+                  <div className="px-6 py-4 border-t border-slate-100">
+                    <div className="mb-4">
+                      <p className="text-slate-700 text-sm mb-4">
+                        This table shows how much each policy lever affects each outcome metric. 
+                        Positive values indicate the policy improves that metric, while negative values indicate it may reduce it.
+                      </p>
+                    </div>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm border-collapse border border-slate-300">
+                        <thead>
+                          <tr className="bg-slate-100">
+                            <th className="border border-slate-300 px-3 py-2 text-left font-semibold text-slate-800">Policy</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">AI Literacy</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">Community Trust</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">Innovation Index</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">Teacher Satisfaction</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">Digital Equity</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">Budget Strain</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">Employability</th>
+                            <th className="border border-slate-300 px-3 py-2 text-center font-semibold text-slate-800">AI Vulnerability</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(coefficients).map(([policyId, coeffs]) => (
+                            <tr key={policyId} className="hover:bg-slate-50">
+                              <td className="border border-slate-300 px-3 py-2 font-medium text-slate-800">
+                                {policyDefinitions[policyId]?.name || policyId}
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.AI_LITERACY > 0 ? 'bg-green-100 text-green-800' : 
+                                  coeffs.AI_LITERACY < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.AI_LITERACY > 0 ? '+' : ''}{coeffs.AI_LITERACY}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.COMMUNITY_TRUST > 0 ? 'bg-green-100 text-green-800' : 
+                                  coeffs.COMMUNITY_TRUST < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.COMMUNITY_TRUST > 0 ? '+' : ''}{coeffs.COMMUNITY_TRUST}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.INNOVATION_INDEX > 0 ? 'bg-green-100 text-green-800' : 
+                                  coeffs.INNOVATION_INDEX < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.INNOVATION_INDEX > 0 ? '+' : ''}{coeffs.INNOVATION_INDEX}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.TEACHER_SATISFACTION > 0 ? 'bg-green-100 text-green-800' : 
+                                  coeffs.TEACHER_SATISFACTION < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.TEACHER_SATISFACTION > 0 ? '+' : ''}{coeffs.TEACHER_SATISFACTION}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.DIGITAL_EQUITY > 0 ? 'bg-green-100 text-green-800' : 
+                                  coeffs.DIGITAL_EQUITY < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.DIGITAL_EQUITY > 0 ? '+' : ''}{coeffs.DIGITAL_EQUITY}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.BUDGET_STRAIN > 0 ? 'bg-red-100 text-red-800' : 
+                                  coeffs.BUDGET_STRAIN < 0 ? 'bg-green-100 text-green-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.BUDGET_STRAIN > 0 ? '+' : ''}{coeffs.BUDGET_STRAIN}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.EMPLOYMENT_IMPACT > 0 ? 'bg-green-100 text-green-800' : 
+                                  coeffs.EMPLOYMENT_IMPACT < 0 ? 'bg-red-100 text-red-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.EMPLOYMENT_IMPACT > 0 ? '+' : ''}{coeffs.EMPLOYMENT_IMPACT}
+                                </span>
+                              </td>
+                              <td className="border border-slate-300 px-3 py-2 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  coeffs.AI_VULNERABILITY_INDEX > 0 ? 'bg-red-100 text-red-800' : 
+                                  coeffs.AI_VULNERABILITY_INDEX < 0 ? 'bg-green-100 text-green-800' : 
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {coeffs.AI_VULNERABILITY_INDEX > 0 ? '+' : ''}{coeffs.AI_VULNERABILITY_INDEX}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-semibold text-blue-900 mb-2">Legend</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-blue-800">
+                        <div className="flex items-center">
+                          <span className="w-3 h-3 bg-green-100 text-green-800 rounded mr-2 text-center leading-3">+</span>
+                          <span>Positive impact (improves metric)</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="w-3 h-3 bg-red-100 text-red-800 rounded mr-2 text-center leading-3">-</span>
+                          <span>Negative impact (reduces metric)</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="w-3 h-3 bg-gray-100 text-gray-800 rounded mr-2 text-center leading-3">0</span>
+                          <span>No significant impact</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-xs text-blue-700">Note: Budget Strain and AI Vulnerability are reversed (red = bad, green = good)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Footer */}
@@ -1319,7 +1508,24 @@ const FAQModal = ({ isOpen, onClose }) => {
   )
 }
 
-function App() {
+function AppContent() {
+  const { state: scenarioState } = useScenarioStore()
+  
+  // Get background color class based on selected scenario
+  const getScenarioBackgroundClass = (scenarioId) => {
+    switch (scenarioId) {
+      case 'bias':
+        return 'bg-gradient-to-br from-red-50 via-red-100 to-red-50'; // Tool Bias Discovery - Red hue
+      case 'funding':
+        return 'bg-gradient-to-br from-orange-50 via-orange-100 to-orange-50'; // Funding Cut - Orange hue
+      case 'breach':
+        return 'bg-gradient-to-br from-yellow-50 via-yellow-100 to-yellow-50'; // Data Breach Incident - Yellow hue
+      case 'normal':
+      default:
+        return 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'; // Normal Conditions - Default
+    }
+  };
+
   const [selectedPolicies, setSelectedPolicies] = useState([])
   const [policyIntensities, setPolicyIntensities] = useState({
     DATA_ANALYTICS: 0,
@@ -1338,7 +1544,7 @@ function App() {
     INNOV_SANDBOX: 0,
     MODEL_EVAL_STD: 0
   })
-  const [selectedTimeSeriesMetrics, setSelectedTimeSeriesMetrics] = useState(['AI_LITERACY'])
+  const [selectedTimeSeriesMetrics, setSelectedTimeSeriesMetrics] = useState(['AI_LITERACY', 'AI_VULNERABILITY_INDEX', 'BUDGET_STRAIN', 'COMMUNITY_TRUST'])
 
   // State initialization
   const [modalState, setModalState] = useState({
@@ -1377,7 +1583,7 @@ function App() {
 
 
 
-  // Update metrics when policies or intensities change
+  // Update metrics when policies, intensities, or scenario changes
   useEffect(() => {
     try {
       const activePolicies = selectedPolicies.filter(policyId => 
@@ -1385,16 +1591,38 @@ function App() {
       );
       
       if (activePolicies.length === 0) {
-        setCurrentMetrics(defaultMetrics);
+        // Use scenario outcomes as baseline when no policies are selected
+        setCurrentMetrics({
+          AI_LITERACY: scenarioState.outcomes.aiLiteracy,
+          COMMUNITY_TRUST: scenarioState.outcomes.communityTrust,
+          INNOVATION_INDEX: scenarioState.outcomes.innovationIndex,
+          TEACHER_SATISFACTION: scenarioState.outcomes.teacherSatisfaction,
+          DIGITAL_EQUITY: scenarioState.outcomes.digitalFairness,
+          BUDGET_STRAIN: scenarioState.outcomes.budgetStrain,
+          EMPLOYMENT_IMPACT: scenarioState.outcomes.employability,
+          AI_VULNERABILITY_INDEX: scenarioState.outcomes.aiVulnerability
+        });
       } else {
-        const metrics = calculateCurrentMetrics(activePolicies, policyIntensities);
-        setCurrentMetrics(metrics);
+        // Calculate policy effects using scenario outcomes as baseline
+        const scenarioBaseline = {
+          AI_LITERACY: scenarioState.outcomes.aiLiteracy,
+          COMMUNITY_TRUST: scenarioState.outcomes.communityTrust,
+          INNOVATION_INDEX: scenarioState.outcomes.innovationIndex,
+          TEACHER_SATISFACTION: scenarioState.outcomes.teacherSatisfaction,
+          DIGITAL_EQUITY: scenarioState.outcomes.digitalFairness,
+          BUDGET_STRAIN: scenarioState.outcomes.budgetStrain,
+          EMPLOYMENT_IMPACT: scenarioState.outcomes.employability,
+          AI_VULNERABILITY_INDEX: scenarioState.outcomes.aiVulnerability
+        };
+        
+        const policyMetrics = calculateCurrentMetrics(activePolicies, policyIntensities, scenarioBaseline);
+        setCurrentMetrics(policyMetrics);
       }
     } catch (error) {
       console.error('Error calculating metrics:', error);
       setCurrentMetrics(defaultMetrics);
     }
-  }, [selectedPolicies, policyIntensities, defaultMetrics]);
+  }, [selectedPolicies, policyIntensities, scenarioState.outcomes, defaultMetrics]);
 
   // Handle policy intensity changes
   const handlePolicyIntensityChange = (policyId, newValue) => {
@@ -1496,7 +1724,7 @@ function App() {
       MODEL_EVAL_STD: 0
     })
     setSelectedPolicies([])
-    setSelectedTimeSeriesMetrics(['AI_LITERACY'])
+    setSelectedTimeSeriesMetrics(['AI_LITERACY', 'AI_VULNERABILITY_INDEX', 'BUDGET_STRAIN', 'COMMUNITY_TRUST'])
     setCurrentMetrics({
         AI_LITERACY: 50,
         COMMUNITY_TRUST: 50,
@@ -1627,7 +1855,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 fade-in">
+    <div className={`min-h-screen ${getScenarioBackgroundClass(scenarioState.scenario)} fade-in`}>
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm shadow-lg border-b border-slate-200 slide-up">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -1642,6 +1870,9 @@ function App() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              {/* Scenario Selector */}
+              <HeaderScenarioSelect />
+              
               <ExploreImpactsButton
                 selectedPolicies={selectedPolicies.map(policyId => ({
                   id: policyId,
@@ -1699,7 +1930,7 @@ function App() {
                         <div className="relative">
                           <details className="relative">
                             <summary className="px-2 py-1 border border-slate-200 rounded text-xs cursor-pointer focus:ring-1 focus:ring-slate-400 focus:border-slate-400 bg-white/90 backdrop-blur-sm list-none flex items-center space-x-1">
-                              <span>Outcome Metrics</span>
+                              <span>Select Graphs</span>
                               <svg className="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                               </svg>
@@ -1749,6 +1980,16 @@ function App() {
                         selectedPolicies={selectedPolicies}
                         policyIntensities={policyIntensities}
                         shockScenario="NONE"
+                        scenarioBaseline={{
+                          AI_LITERACY: scenarioState.outcomes.aiLiteracy,
+                          COMMUNITY_TRUST: scenarioState.outcomes.communityTrust,
+                          INNOVATION_INDEX: scenarioState.outcomes.innovationIndex,
+                          TEACHER_SATISFACTION: scenarioState.outcomes.teacherSatisfaction,
+                          DIGITAL_EQUITY: scenarioState.outcomes.digitalFairness,
+                          BUDGET_STRAIN: scenarioState.outcomes.budgetStrain,
+                          EMPLOYMENT_IMPACT: scenarioState.outcomes.employability,
+                          AI_VULNERABILITY_INDEX: scenarioState.outcomes.aiVulnerability
+                        }}
                       />
                     </div>
                   </div>
@@ -2306,7 +2547,6 @@ function App() {
                 </div>
               </div>
             </div>
-          )}
         </div>
       </div>
       
@@ -2833,6 +3073,15 @@ function App() {
        />
     </div>
   )
+}
+
+// Main App component with ScenarioProvider
+function App() {
+  return (
+    <ScenarioProvider>
+      <AppContent />
+    </ScenarioProvider>
+  );
 }
 
 export default App

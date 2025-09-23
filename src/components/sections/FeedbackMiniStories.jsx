@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { IconLoop } from '../shared/IconLoop';
 import { Badge } from '../shared/Badge';
 
@@ -9,10 +9,8 @@ import { Badge } from '../shared/Badge';
  * @param {boolean} props.showDiagram - Whether to show diagram toggle
  */
 export function FeedbackMiniStories({ 
-  stories = [], 
-  showDiagram = false 
+  stories = []
 }) {
-  const [showDiagramView, setShowDiagramView] = useState(false);
 
   const getLoopType = (story) => {
     if (story.toLowerCase().includes('positive') || story.toLowerCase().includes('reinforcing')) {
@@ -30,14 +28,6 @@ export function FeedbackMiniStories({
         <h3 className="text-lg font-semibold text-gray-900">
           Feedback Mini-Stories
         </h3>
-        {showDiagram && (
-          <button
-            onClick={() => setShowDiagramView(!showDiagramView)}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-          >
-            {showDiagramView ? 'Hide diagram' : 'View diagram'}
-          </button>
-        )}
       </div>
       
       {stories.length > 0 ? (
@@ -109,15 +99,6 @@ export function FeedbackMiniStories({
         </div>
       )}
       
-      {showDiagram && showDiagramView && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
-          <h4 className="font-medium text-gray-900 mb-3">System Dynamics Diagram</h4>
-          <div className="text-center text-gray-500 text-sm">
-            <p>🔧 Diagram view would be implemented here</p>
-            <p className="mt-1">This would show visual representation of feedback loops</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
